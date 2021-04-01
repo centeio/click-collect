@@ -20,8 +20,8 @@ class ShopAssist(AgentBrain):
     and replies 'welcome '+ID to all received messages.
     It checks that received welcomes are indeed using my own ID
     """
-    def __init__(self, slowdown:int = 1):
-        super().__init__(slowdown)
+    def __init__(self):
+        super().__init__(memorize_for_ticks=None)
         self._sentMessage=False
     
     
@@ -48,9 +48,10 @@ class ShopAssist(AgentBrain):
         return state
 
     def decide_on_action(self, state:State):
-        return None,{}
+        return None, {}
 
-        #Override
+
+    #Override
     #def decide_on_action(self, state:State):
     #    '''
     #    Final . Agents must override decide_on_bw4t_action instead
