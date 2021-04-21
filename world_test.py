@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import time
 
 from matrx.agents import PatrollingAgentBrain, HumanAgentBrain
 from matrx.world_builder import WorldBuilder
@@ -11,6 +12,7 @@ from matrx.world_builder import RandomProperty # type: ignore
 from matrx.goals import WorldGoal # type: ignore
 
 from agents1.shopassist import ShopAssist
+from agents1.task_maker import TaskMaker
 from agents1.human import Human
 
 hostage_type = ['robot', 'dog', 'baby', 'elderly']
@@ -86,9 +88,9 @@ def add_rooms2(builder):
     room_locations = {}
     w=16
     h=4
-    locs = {0: (1,2), 1: (1,6), 2: (1,10), 
-            3: (1,14), 4: (1,18), 5: (1,22),
-            6: (1,26)}
+    locs = {0: (4,2), 1: (4,6), 2: (4,10), 
+            3: (4,14), 4: (4,18), 5: (4,22),
+            6: (4,26)}
     for room_nr in range(7):
         room_top_left_x, room_top_left_y = locs[room_nr]
 
@@ -105,12 +107,78 @@ def add_rooms2(builder):
         room_name = f"room_{room_nr}"
         builder.add_room(top_left_location= (room_top_left_x, room_top_left_y), width=w, height=h, name=room_name,
                          door_locations=door_locs, doors_open = True,
-                         wall_visualize_colour=wall_color, with_area_tiles=True,
-                         area_visualize_colour=room_color, area_visualize_opacity=0.1)
+                         wall_visualize_colour=wall_color,
+                         with_area_tiles=True,
+                         wall_visualize_opacity=0.1,
+                         area_visualize_colour=room_color, area_visualize_opacity=0.0)
 
         # Find all inner room locations where we allow objects (making sure that the location behind to door is free)
         room_locations[room_name] = builder.get_room_locations((room_top_left_x, room_top_left_y), 16, 4)
+    
 
+
+    return room_locations
+
+def add_aisles(builder):
+    room_locations = {}
+    w=16
+    h=4
+    locs = {0: (4,2), 1: (4,6), 2: (4,10), 
+            3: (4,14), 4: (4,18), 5: (4,22),
+            6: (4,26), 7: (1,2), 8:(1,17)}
+    for room_nr in range(7):
+        room_top_left_x, room_top_left_y = locs[room_nr]
+
+        # We assign a simple random color to each room. Not for any particular reason except to brighting up the place.
+        np.random.shuffle(room_colors)
+        room_color = room_colors[0]
+
+        door_locs = [(room_top_left_x, room_top_left_y),(room_top_left_x, room_top_left_y+1),
+            (room_top_left_x, room_top_left_y+2),(room_top_left_x, room_top_left_y+3),
+            (room_top_left_x+w-1, room_top_left_y),(room_top_left_x+w-1, room_top_left_y+1),
+            (room_top_left_x+w-1, room_top_left_y+2),(room_top_left_x+w-1, room_top_left_y+3)]
+
+        # Add the room
+        room_name = f"room_{room_nr}"
+        builder.add_room(top_left_location= (room_top_left_x, room_top_left_y), width=w, height=h, name=room_name,
+                         door_locations=door_locs, doors_open = True,
+                         wall_visualize_colour=wall_color,
+                         with_area_tiles=True,
+                         wall_visualize_opacity=0.1,
+                         area_visualize_colour=room_color, area_visualize_opacity=0.0)
+
+        # Find all inner room locations where we allow objects (making sure that the location behind to door is free)
+        room_locations[room_name] = builder.get_room_locations((room_top_left_x, room_top_left_y), w, h)
+
+    w2 = 3
+    h2 = 13
+
+    for room_nr in range(2):
+        room_nr += 7
+        room_top_left_x, room_top_left_y = locs[room_nr]
+        
+
+        # We assign a simple random color to each room. Not for any particular reason except to brighting up the place.
+        np.random.shuffle(room_colors)
+        room_color = room_colors[0]
+
+        door_locs = [(room_top_left_x+1, room_top_left_y),(room_top_left_x+1, room_top_left_y+h2-1)]
+
+        for d in range(h2):
+            door_locs += [(room_top_left_x+2, room_top_left_y+d)]
+
+        # Add the room
+        room_name = f"room_{room_nr}"
+        builder.add_room(top_left_location= (room_top_left_x, room_top_left_y), width=w2, height=h2, name=room_name,
+                         door_locations=door_locs, doors_open = True,
+                         wall_visualize_colour=wall_color,
+                         with_area_tiles=True,
+                         wall_visualize_opacity=0.1,
+                         area_visualize_colour=room_color, area_visualize_opacity=0.0)
+
+        # Find all inner room locations where we allow objects (making sure that the location behind to door is free)
+        room_locations[room_name] = builder.get_room_locations((room_top_left_x, room_top_left_y), w2, h2)
+    
     return room_locations
 
 def add_dropoffs(builder):
@@ -182,26 +250,32 @@ def add_agents(builder):
     team_name = "Team 1" # currently this supports 1 team 
     builder.add_agent(loc, ShopAssist(), team=team_name, name="shopassist1",
 #                sense_capability=sense_capability)
-            sense_capability=sense_capability, img_name="/static/images/shop_assist.png")
+            sense_capability=sense_capability, img_name="/static/images/smile.png")
 
     loc = [25,19] # agents start in horizontal row at top left corner.
     builder.add_agent(loc, ShopAssist(), team=team_name, name="shopassist2",
 #                sense_capability=sense_capability)
-            sense_capability=sense_capability, img_name="/static/images/shop_assist.png")
+            sense_capability=sense_capability, img_name="/static/images/smile.png")
+
+    loc = [26,19]
+    builder.add_agent(loc, TaskMaker(), team = team_name, name = "taskmaker1", sense_capability=sense_capability, visualize_opacity=0.0)
+
 
 def create_builder():
     tick_dur = 0.1
     factory = WorldBuilder(random_seed=1, shape=[32, 32], tick_duration=tick_dur, verbose=False, run_matrx_api=True,
-                           run_matrx_visualizer=True, visualization_bg_clr="#f0f0f0", simulation_goal=100000)
-                           #visualization_bg_img='/static/images/usar_background1.png')
+                           run_matrx_visualizer=True, simulation_goal=100000,
+                           visualization_bg_img='/static/images/Picture3.png')
 
-    factory.add_room(top_left_location=[0, 0], width=32, height=32, wall_visualize_colour=wall_color, name="world_bounds")
+    factory.add_room(top_left_location=[0, 0], width=32, height=32, wall_visualize_colour=wall_color,
+                    wall_visualize_opacity=0.0, area_visualize_opacity=0.0, name="world_bounds")
     
     #add_dropoffs(factory)
 
-    rooms_locations = add_rooms2(factory)
+    rooms_locations = add_aisles(factory)
     add_dropoffs2(factory)
 
+    time.sleep(3)
     #add_hostages(factory, rooms_locations)
     add_blocks(factory, rooms_locations)
 
