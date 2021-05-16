@@ -1,7 +1,6 @@
 import numpy as np # type: ignore
 import random
 
-from matrx.agents.agent_types.patrolling_agent import PatrollingAgentBrain # type: ignore
 #from matrx.actions import MoveNorth, OpenDoorAction, CloseDoorAction # type: ignore
 #from matrx.actions.move_actions import MoveEast, MoveSouth, MoveWest # type: ignore
 from matrx.agents.agent_utils.state import State # type: ignore
