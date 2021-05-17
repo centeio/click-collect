@@ -1,7 +1,3 @@
-from matrx.actions import Action, ActionResult, GrabObject, RemoveObject, OpenDoorAction, CloseDoorAction
-from matrx.agents.agent_utils.state import State
-from matrx.agents.agent_brain import AgentBrain
-
 import queue
 
 pool = queue.SimpleQueue()
@@ -10,7 +6,7 @@ n_types_task = 3
 ids = 0
 
 
-class Task(AgentBrain):
+class Task():
     def __init__(self, task_name, task_type, agent = None, human = None):
         global ids
         self.type = task_type
@@ -19,13 +15,11 @@ class Task(AgentBrain):
         ids += 1
         self.assigned_by = agent
         self.assigned_to = human
-        #TODO
         self.start_time = 0
         self.is_completed = False
-        #self.start()
-
-    #def start(self):
-        # TODO add the objects 
+        self.to_start = False
+        
+        print("HERE TASK INIT")
 
     def set_assigned_by(self, agent):
         self.assigned_by = agent
@@ -37,20 +31,20 @@ class Task(AgentBrain):
         self.assigned_by = agent
         self.assigned_to = human
 
-    def filter_observations(self, state):
-        return state
-
-    def decide_on_action(self, state:State):
-        return None, {}
-
 
 
 class Task1(Task):
-    def __init__(self, agent = None, human = None):
+    def __init__(self, products, agent = None, human = None):
         task_name = "This is Task 1"
         task_type = "task1"
+        print("HERE TASK1 INIT 1")
 
         super().__init__(task_name, task_type, agent, human)
+
+        print("HERE TASK1 INIT 2")
+
+        self.products = products
+
 
 class Task2(Task):
     def __init__(self, agent = None, human = None):
@@ -63,3 +57,5 @@ class Task3(Task):
         task_name = "This is Task 3"
         task_type = "task3"
         super().__init__(task_name, task_type, agent, human)
+
+

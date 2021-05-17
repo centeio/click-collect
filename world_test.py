@@ -226,6 +226,8 @@ def add_hostages(builder, room_locations):
 def add_products(builder, room_locations):
     room_nr = 0
 
+    np.random.seed(10)
+
     for room_name, locations in room_locations.items():
         theme = room_themes[room_nr]
         images_path = os.listdir(os.path.abspath(os.path.join(script_dir, "media/images/" + theme)))
@@ -237,9 +239,6 @@ def add_products(builder, room_locations):
 
         for i in range(min_i):
 
-            # Create a MATRX random property of type of hostage so each hostage varies per created world.
-            # These random property objects are used to obtain a certain value each time a new world is
-            # created from this builder.
             loc = locations[i]
             image = "/images/" + theme + "/" + images_path[i]
         
@@ -251,6 +250,7 @@ def add_products(builder, room_locations):
             builder.add_object(loc, name, callable_class=CollectableProduct, img_name=image)
 
         room_nr += 1
+
 
 
 def add_blocks(builder, room_locations):
@@ -295,8 +295,40 @@ def add_agents(builder):
 #                sense_capability=sense_capability)
             sense_capability=sense_capability, img_name="/images/smile_glasses.png")
 
+
+
+def create_tasks(builder):
+    sense_capability = SenseCapability({None: 50})
+
+    f = open("tasks.txt", "w")
+    f2 = open("products.txt", "w")
+
+    world_products = [x['custom_properties']['img_name'] for x in builder.object_settings if x['callable_class'] == CollectableProduct ]
+
+    f2.write(str(world_products))
+
+    tasks = []
+
+    for i in range(20):
+        n_items = np.random.choice(list(range(4))) + 1
+        products = np.random.choice(world_products,n_items).tolist()
+        tasks += [products]
+        msg = str(products) + "\n"
+        f.write(msg)
+
+
     loc = [26,19]
-    builder.add_agent(loc, TaskMaker(), team = team_name, name = "taskmaker1", sense_capability=sense_capability, visualize_opacity=0.0)
+
+    builder.add_agent(loc, TaskMaker(), team="team_name", name = "taskmaker1", sense_capability=sense_capability, 
+                visualize_opacity=0.0, custom_properties = {"tasks": tasks})
+
+                #TODO check tasks structure. is array creating the error?
+
+    print("FINISHED CREATING TASK MAKER")
+
+    f.close()
+    f2.close()
+
 
 
 class CollectionGoal(WorldGoal):
@@ -332,31 +364,33 @@ def create_builder():
 
     goal = CollectionGoal(10000)
 
-    factory = WorldBuilder(random_seed=1, shape=[32, 32], tick_duration=tick_dur, verbose=False, run_matrx_api=True,
+    builder = WorldBuilder(random_seed=1, shape=[32, 32], tick_duration=tick_dur, verbose=False, run_matrx_api=True,
                            run_matrx_visualizer=True, simulation_goal=goal,
                            visualization_bg_img='/images/Picture4.png')
 
-    factory.add_room(top_left_location=[0, 0], width=32, height=32, wall_visualize_colour=wall_color,
+    builder.add_room(top_left_location=[0, 0], width=32, height=32, wall_visualize_colour=wall_color,
                     wall_visualize_opacity=0.0, area_visualize_opacity=0.0, name="world_bounds")
 
-    factory.add_object([26,9],'basket',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/basket.png")
-    factory.add_object([26,19],'basket',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/basket.png")
+    builder.add_object([26,9],'basket',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/basket.png")
+    builder.add_object([26,19],'basket',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/basket.png")
 
-    factory.add_object([28,30],'cart',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/shopping_cart.png")
-    factory.add_object([29,30],'cart',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/shopping_cart.png")
-    factory.add_object([30,30],'cart',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/shopping_cart.png")
+    builder.add_object([28,30],'cart',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/shopping_cart.png")
+    builder.add_object([29,30],'cart',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/shopping_cart.png")
+    builder.add_object([30,30],'cart',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/shopping_cart.png")
 
     
-    #add_dropoffs(factory)
+    #add_dropoffs(builder)
 
-    rooms_locations = add_aisles(factory)
-    add_dropoffs2(factory)
+    rooms_locations = add_aisles(builder)
+    add_dropoffs2(builder)
 
     time.sleep(3)
-    add_products(factory, rooms_locations)
-    #add_blocks(factory, rooms_locations)
+    add_products(builder, rooms_locations)
+    #add_blocks(builder, rooms_locations)
 
-    add_agents(factory)
+    add_agents(builder)
+
+    create_tasks(builder)
 
     # add human agent
     key_action_map = {
@@ -364,22 +398,21 @@ def create_builder():
         'd': MoveEast.__name__,
         's': MoveSouth.__name__,
         'a': MoveWest.__name__,
-        'r': RemoveObject.__name__,
         'q': GrabObject.__name__,
         'e': DropObject.__name__,
     }
 
-    sense_capability_h = SenseCapability({CollectableProduct: 2, None:50})
+    sense_capability_h = SenseCapability({CollectableProduct: 2, None:50}, )
 
     human_brain = HumanAgentBrain(max_carry_objects=3, grab_range=0)
-    factory.add_human_agent([20, 2], human_brain, team="Team 1", name="human",
+    builder.add_human_agent([20, 2], human_brain, team="Team 1", name="human",
                             key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/images/smile.png")
                             #key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/static/images/transparent.png")
 #            builder.add_agent(loc, brain, team=team_name, name=agent['name'],
 #                sense_capability=sense_capability)
 #                sense_capability=sense_capability, img_name="/static/images/robot1.png")
 
-    return factory
+    return builder
 
  
 if __name__ == "__main__":

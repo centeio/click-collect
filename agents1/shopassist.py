@@ -21,8 +21,6 @@ ACCEPT = "accept"
 
 max_tasks = 1
 
-i = 0
-
 class ShopAssist(AgentBrain):
     """
     Agent that broadcasts "hello I'm "+ID message to the other agents,
@@ -32,10 +30,11 @@ class ShopAssist(AgentBrain):
     def __init__(self):
         super().__init__(memorize_for_ticks=None)
         self._sentMessage=False
-        self.tasks_required = {}
+        self.task_required = None
         self.tasks_assigned = {}
         self.tasks_completed = {}
         self.tasks_failed = {}
+        self.products = {}
    
     
     #override
@@ -62,10 +61,10 @@ class ShopAssist(AgentBrain):
                 request = msg.split()
                 print(request)
                 task_id = int(request[1])
-                if task_id in self.tasks_required.keys():
-                    self.tasks_required[task_id].assign(agent = self.agent_id, human = "h1")
-                    self.tasks_assigned[task_id] = self.tasks_required[task_id]
-                    del self.tasks_required[task_id]
+                if task_id == self.task_required.id:
+                    self.task_required.assign(agent = self.agent_id, human = "h1")
+                    self.tasks_assigned[task_id] = self.task_required
+                    self.task_required = None
 
             elif msg.startswith(DONE):
                 request = msg.split()
@@ -87,15 +86,15 @@ class ShopAssist(AgentBrain):
 
 
         # choose task
-        if len(self.tasks_required) < max_tasks:
+        if self.task_required == None:
             #TODO
             global pool
+
             if not pool.empty():
-                new_task = pool.get()
-                new_task_msg = "New task: " + new_task.name + ", Id: " + str(new_task.id)
-                print(new_task_msg)
-                self.send_message(Message(new_task_msg, from_id=self.agent_id))
-                self.tasks_required[new_task.id] = new_task
+                self.task_required = pool.get()
+                self.products = self.task_required.products
+                self.p_i = 0
+
             else:
                 print("pool empty")
             
@@ -115,17 +114,28 @@ class ShopAssist(AgentBrain):
         self.received_messages=[]        
         return state
 
+
     def decide_on_action(self, state:State):
         action = None
         action_kwargs = {}
-        global i
-        if i == 100:
-            if self.agent_name == "shopassist1":
-                print("trying to add product !!!!!!!!!!!!")
-                action = AddProduct.__name__
-                i += 1
-        else:
-            i += 1
+
+        if self.p_i < len(self.products):
+            loc_x, loc_y = state[self.agent_id]['location']
+            action = AddProduct.__name__
+
+            p_loc = (loc_x + self.p_i - 1, loc_y + 1)
+
+            action_kwargs['location'] = p_loc
+            action_kwargs['img'] = self.products[self.p_i]
+
+            self.p_i += 1
+
+
+            if self.p_i == len(self.products):
+
+                new_task_msg = "New task: " + self.task_required.name + ", Id: " + str(self.task_required.id)
+                self.send_message(Message(new_task_msg, from_id=self.agent_id))
+
         return action, action_kwargs
 
 
@@ -147,11 +157,11 @@ class ShopAssist(AgentBrain):
 
     
 class GhostBlock(EnvObject):
-    def __init__(self, location, drop_zone_nr, name, visualize_colour, visualize_shape):
+    def __init__(self, location, drop_zone_nr, name, img_name):
         super().__init__(location, name, is_traversable=True, is_movable=False,
-                         visualize_colour=visualize_colour, visualize_shape=visualize_shape,
-                         visualize_size=0.5, class_callable=GhostBlock,
-                         visualize_depth=85, drop_zone_nr=drop_zone_nr, visualize_opacity=0.5,
+                         visualize_shape='img', img_name=img_name,
+                         visualize_size=1, class_callable=GhostBlock,
+                         visualize_depth=85, drop_zone_nr=drop_zone_nr, visualize_opacity=0.7,
                          is_drop_zone=False, is_goal_block=True, is_collectable=False)
 
 class AddProduct(Action):
@@ -195,12 +205,11 @@ class AddProduct(Action):
         #}
 
         obj_body_args = {
-            "location": loc,
+            "location": kwargs['location'],
             "name": "Collect Block",
             #"class_callable": GhostBlock,
-            "visualize_colour": '#332288',
-            "visualize_shape": 0,
-            "drop_zone_nr": 1
+            "drop_zone_nr": 1,
+            "img_name": kwargs['img']
         }
 
         # merge the two sets of agent body properties

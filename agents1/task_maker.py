@@ -8,8 +8,8 @@ from matrx.messages.message import Message # type: ignore
 from matrx.agents.agent_brain import AgentBrain
 from tasks.task import Task1, Task2, Task3, pool, min_pool_size, n_types_task
 
+i_task = 0
 
-#from bw4t.BW4TBrain import BW4TBrain
 
 class TaskMaker(AgentBrain):
     """
@@ -17,33 +17,23 @@ class TaskMaker(AgentBrain):
     """
     def __init__(self):
         super().__init__(memorize_for_ticks=None)
-        random.seed(10)
-        for i in range(5):
-            self.create_task()
+
  
     def create_task(self):
-        n = random.randint(0,n_types_task-1)
-        if n == 0:
-            new_task = Task1()
+        global i_task 
 
-        elif n == 1:
-            new_task = Task2()
-
-        elif n == 2:
-            new_task = Task3()
-
-        else:
-            print("Couldn't recognize option! - Task maker ", n)
-            return None   
-
+        new_task = Task1(products = self.agent_properties["custom_properties"]["tasks"][i_task])
 
         pool.put(new_task)
+
+        i_task += 1
     
         return None   
     
     #override
     def filter_observations(self, state):
         global pool
+
         if pool.qsize() < min_pool_size:
             n_new_tasks = min_pool_size - pool.qsize()
             for i in range(n_new_tasks):
