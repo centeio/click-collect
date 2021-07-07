@@ -1,61 +1,70 @@
 import queue
+import time
 
 pool = queue.SimpleQueue()
 min_pool_size = 5
 n_types_task = 3
 ids = 0
-
+points = 2
+nr_clicks = 0
 
 class Task():
-    def __init__(self, task_name, task_type, agent = None, human = None):
+    def __init__(self, products):
         global ids
-        self.type = task_type
-        self.name = task_name
         self.id = ids
         ids += 1
-        self.assigned_by = agent
-        self.assigned_to = human
-        self.start_time = 0
-        self.is_completed = False
-        self.to_start = False
-        
-        print("HERE TASK INIT")
+        self.agent = None
+        self.human = None
 
-    def set_assigned_by(self, agent):
-        self.assigned_by = agent
-
-    def set_is_completed(self, is_completed):
-        self.is_completed = is_completed
-
-    def assign(self, agent, human):
-        self.assigned_by = agent
-        self.assigned_to = human
-
-
-
-class Task1(Task):
-    def __init__(self, products, agent = None, human = None):
-        task_name = "This is Task 1"
-        task_type = "task1"
-        print("HERE TASK1 INIT 1")
-
-        super().__init__(task_name, task_type, agent, human)
-
-        print("HERE TASK1 INIT 2")
+        self.presented_time = None
+        self.time_start = None
+        self.time_end = None
+        self.nr_clicks_start = 0
+        self.nr_clicks_start = 0
 
         self.products = products
+        self.nr_products = len(products)
+        self.max_score = points * self.nr_products
 
+        self.completed_prod = 0
+        self.success = False
 
-class Task2(Task):
-    def __init__(self, agent = None, human = None):
-        task_name = "This is Task 2"
-        task_type = "task2"
-        super().__init__(task_name, task_type, agent, human)
+        self.status = None #possible values are None, PRESENTED, ACCEPTED, DISCARDED, GIVEUP, SUCCESSDONE, UNSUCCESSDONE
 
-class Task3(Task):
-    def __init__(self, agent = None, human = None):
-        task_name = "This is Task 3"
-        task_type = "task3"
-        super().__init__(task_name, task_type, agent, human)
+    def presented(self, agent):
+        self.agent = agent
+        self.status = "PRESENTED"
+        self.presented_time = time.time()
+        self.print_task()
+        
+    def accept(self):
+        global nr_clicks
+        self.status = "ACCEPTED"
+        self.time_start = time.time()
+        nr_clicks = 0
+        self.print_task()
 
+    def discard(self):
+        self.status = "DISCARDED"
+        self.time_end = time.time()
+        self.print_task()
 
+    def done(self, success, score):
+        self.success = success
+        if success:
+            self.status = "SUCCESSDONE"
+        else:
+            self.status = "UNSUCCESSDONE"
+        self.time_end = time.time()
+        self.print_task()
+
+    def giveup(self, success, score):
+        self.status = "GIVEUP"
+        self.success = success
+        self.completed_prod = score
+        self.time_end = time.time()
+        self.print_task()
+
+    def print_task(self):
+        #TODO log task
+        return None

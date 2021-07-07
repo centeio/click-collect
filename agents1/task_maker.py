@@ -6,9 +6,10 @@ import random
 from matrx.agents.agent_utils.state import State # type: ignore
 from matrx.messages.message import Message # type: ignore
 from matrx.agents.agent_brain import AgentBrain
-from tasks.task import Task1, Task2, Task3, pool, min_pool_size, n_types_task
+from tasks.task import Task, pool, min_pool_size, n_types_task
 
 i_task = 0
+
 
 
 class TaskMaker(AgentBrain):
@@ -22,7 +23,7 @@ class TaskMaker(AgentBrain):
     def create_task(self):
         global i_task 
 
-        new_task = Task1(products = self.agent_properties["custom_properties"]["tasks"][i_task])
+        new_task = Task(products = self.agent_properties["custom_properties"]["tasks"][i_task])
 
         pool.put(new_task)
 

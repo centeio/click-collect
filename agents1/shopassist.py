@@ -6,9 +6,10 @@ from matrx.actions.move_actions import MoveEast, MoveSouth, MoveWest # type: ign
 from matrx.agents.agent_utils.state import State # type: ignore
 from matrx.messages.message import Message # type: ignore
 from matrx.agents.agent_brain import AgentBrain
-from tasks.task import Task, pool
 from matrx.objects import EnvObject, env_object # type: ignore
 
+from tasks.task import pool, nr_clicks
+from world1.objects import GhostProduct, CollectableProduct
 
 #from bw4t.BW4TBrain import BW4TBrain
 
@@ -27,90 +28,59 @@ class ShopAssist(AgentBrain):
     and replies 'welcome '+ID to all received messages.
     It checks that received welcomes are indeed using my own ID
     """
-    def __init__(self):
+    def __init__(self,name,drop_zone_nr):
         super().__init__(memorize_for_ticks=None)
-        self._sentMessage=False
+        self.id = name
+        self.drop_zone_nr = drop_zone_nr
         self.task_required = None
-        self.tasks_assigned = {}
-        self.tasks_completed = {}
-        self.tasks_failed = {}
-        self.products = {}
+        self.new_task = False
    
     
     #override
     def filter_observations(self, state):
 
-        if not self._sentMessage:
-            #broadcast
-            self.send_message(Message(HELLO+self.agent_id, from_id=self.agent_id ))
-            self._sentMessage=True
-
-        # TODO automatically check whether task completed
-        #for task in self.tasks_assigned:
-        #    if task.is_completed():
-        #        end_task_msg = "Thank you, " + str(task.assigned_to) + ", for completing the task " + task.id
-        #        print(end_task_msg)
-        #        self.send_message(Message(end_task_msg, from_id=self.agent_id, to_id=task.assigned_to))
-
-        # check whether human wants a task
         for msg in self.received_messages:
 
             print("agent",self.agent_id,"received message:",msg)
 
-            if msg.startswith(ACCEPT):
-                request = msg.split()
-                print(request)
-                task_id = int(request[1])
-                if task_id == self.task_required.id:
-                    self.task_required.assign(agent = self.agent_id, human = "h1")
-                    self.tasks_assigned[task_id] = self.task_required
-                    self.task_required = None
+            if self.task_required != None:
 
-            elif msg.startswith(DONE):
-                request = msg.split()
-                task_id = int(request[1])
-                if task_id in self.tasks_assigned.keys():
-                    self.tasks_assigned[task_id].set_is_completed(True)
-                    self.tasks_completed[task_id] = self.tasks_assigned[task_id]
-                    del self.tasks_assigned[task_id]
+                if self.task_required.status == "PRESENTED":
 
-            elif msg.startswith(GIVEUP):
-                request = msg.split()
-                task_id = int(request[2])
-                if task_id in self.tasks_assigned.keys():
-                    self.tasks_failed[task_id] = self.tasks_assigned[task_id]
-                    del self.tasks_assigned[task_id]
+                    if msg.startswith(ACCEPT):
+                        request = msg.split()
+                        agent_id = request[1]
+                        if agent_id == self.id:
+                            self.task_required.accept()
+                        else:
+                            self.task_required.discard()
+                            self.task_required = None
+                
+                elif self.task_required.status == "ACCEPTED":
 
-            else:
-                print("Received not-understood message"+msg)
+                    if msg.startswith(DONE):
+                        success, score = self.check_success(state)
+                        self.task_required.done(success, score)
+                        self.task_required = None
 
+                    elif msg.startswith(GIVEUP):
+                        success, score = self.check_success(state)
+                        self.task_required.giveup(success, score)
+                        self.task_required = None
 
-        # choose task
+        # present task
         if self.task_required == None:
             #TODO
             global pool
 
             if not pool.empty():
                 self.task_required = pool.get()
-                self.products = self.task_required.products
-                self.p_i = 0
-
+                self.task_required.presented(self.id)
+               # self.p_i = 0
+                self.new_task = True
             else:
                 print("pool empty")
-            
-        #for msg in self.received_messages:
-        #    print("agent",self.agent_id,"received message:",msg)
-        #    if msg.startswith(HELLO):
-        #        id = msg[len(HELLO):]
-        #        self.send_message(Message(WELCOME+id, from_id=self.agent_id, to_id=id))
-        #    elif msg.startswith(WELCOME):
-        #        id = msg[len(WELCOME):]
-        #        if not id==self.agent_id:
-        #            print("Received welcome for someone else?!")
-        #    else:
-        #        print("Received not-understood message"+msg)
 
-        #bug workaround
         self.received_messages=[]        
         return state
 
@@ -118,54 +88,72 @@ class ShopAssist(AgentBrain):
     def decide_on_action(self, state:State):
         action = None
         action_kwargs = {}
+        replace_objects = []
+        remove_objects = []
+        add_objects = []
 
-        if self.p_i < len(self.products):
+        if self.new_task == True:
+            action = ReplaceProduct.__name__
             loc_x, loc_y = state[self.agent_id]['location']
-            action = AddProduct.__name__
 
-            p_loc = (loc_x + self.p_i - 1, loc_y + 1)
+            dropped_found = state.get_with_property({'is_collectable': True})
+            if dropped_found != None:
+                #print("::::::::: DROPPED FOUND ::::::::", dropped_found)
+                replace_objects += dropped_found
 
-            action_kwargs['location'] = p_loc
-            action_kwargs['img'] = self.products[self.p_i]
+            for i in range(5): #TODO get this number from somewhere else
+                p_loc = (loc_x + i - 1, loc_y + 1)
 
-            self.p_i += 1
+                previous_objs = state.get_with_property({'is_collectable': False, 'location': p_loc})
+                if previous_objs != None:
+                    print("::::::::: PREVIOUS TAKS OBJS ::::::::", previous_objs)
+                    remove_objects += [previous_objs[0]]
 
+            for i in range(len(self.task_required.products)):
+                p_loc = (loc_x + i - 1, loc_y + 1)
+                obj_kwargs = {}
 
-            if self.p_i == len(self.products):
+                obj_kwargs['location'] = p_loc
+                obj_kwargs['img'] = self.task_required.products[i]
+                obj_kwargs['drop_zone_nr'] = self.drop_zone_nr
 
-                new_task_msg = "New task: " + self.task_required.name + ", Id: " + str(self.task_required.id)
-                self.send_message(Message(new_task_msg, from_id=self.agent_id))
+                add_objects += [obj_kwargs]
+
+            new_task_msg = "New task!"
+            self.send_message(Message(new_task_msg, from_id=self.agent_id))
+            self.new_task = False
+
+        action_kwargs["remove_objects"] = remove_objects
+        action_kwargs["replace_objects"] = replace_objects
+        action_kwargs["add_objects"] = add_objects
 
         return action, action_kwargs
 
 
-    #Override
-    #def decide_on_action(self, state:State):
-    #    '''
-    #    Final . Agents must override decide_on_bw4t_action instead
-    #    '''
-    #    act,params = self.decide_on_bw4t_action(state)
-    #    wrong = self.NOT_ALLOWED_PARAMS.intersection(set(params.keys()))
-    #    if len(wrong) > 0:
-    #        raise ValueError("Parameter use not allowed ", wrong)
-    #    params['grab_range']=1
-    #    # door_range=1 does not work, doors don't open
-    #    #params['door_range']=1
-    #    params['max_objects']=3
-    #    params['action_duration'] = self.__slowdown
-    #    return act,params
 
-    
-class GhostBlock(EnvObject):
-    def __init__(self, location, drop_zone_nr, name, img_name):
-        super().__init__(location, name, is_traversable=True, is_movable=False,
-                         visualize_shape='img', img_name=img_name,
-                         visualize_size=1, class_callable=GhostBlock,
-                         visualize_depth=85, drop_zone_nr=drop_zone_nr, visualize_opacity=0.7,
-                         is_drop_zone=False, is_goal_block=True, is_collectable=False)
+    def check_success(self, state:State):
+        #TODO
+        n_prod = len(self.task_required.products)
+        loc_x, loc_y = state[self.agent_id]['location']
 
-class AddProduct(Action):
-    """ An action that can add a patient agent to the gridworld """
+        score = 0
+        check = False
+
+        for i in range(n_prod):
+            p_loc = (loc_x + i - 1, loc_y + 1)
+            goal_found = state.get_with_property({'name': "Collect Product", 'location': p_loc}) 
+            dropped_found = state.get_with_property({'is_collectable': True, 'location': p_loc})
+            if goal_found != None and dropped_found != None:
+                if goal_found[0]['img_name'] == dropped_found[0]['img_name']:
+                    score += 1
+
+        if score == n_prod:
+            check = True
+
+        return (check, score)
+
+class ReplaceProduct(Action):
+    """ An action that can add a product to the gridworld """
 
     def __init__(self, duration_in_ticks=0):
         super().__init__(duration_in_ticks)
@@ -180,53 +168,47 @@ class AddProduct(Action):
         #    return AddObjectResult(AddObjectResult.NO_AGENTBODY, False)
 
         # success
-        return AddObjectResult(AddObjectResult.ACTION_SUCCEEDED, True)
+        return ReplaceProductResult(ReplaceProductResult.ACTION_SUCCEEDED, True)
 
 
     def mutate(self, grid_world, agent_id, **kwargs):
-        # create the agent brain
-        # agentbrain = GhostBlock(**kwargs['brain_args'])
 
-        # these properties can't be sent via the kwargs because the API can't JSON serialize these objects and would
-        # throw an error
+        #TODO for each prod in remove_obj, put it back in original position ()
 
-        loc = [24,10]
-        #obj_body_args = {
-        #    "sense_capability": SenseCapability({"*": np.inf}),
-        #    "class_callable": PatientAgent,
-        #    "callback_agent_get_action": agentbrain._get_action,
-        #    "callback_agent_set_action_result": agentbrain._set_action_result,
-        #    "callback_agent_observe": agentbrain._fetch_state,
-        #    "callback_agent_log": agentbrain._get_log_data,
-        #    "callback_agent_get_messages": agentbrain._get_messages,
-        #    "callback_agent_set_messages": agentbrain._set_messages,
-        #    "callback_agent_initialize": agentbrain.initialize,
-        #    "callback_create_context_menu_for_other": agentbrain.create_context_menu_for_other
-        #}
+        for i_rep in range(len(kwargs['replace_objects'])):
 
-        obj_body_args = {
-            "location": kwargs['location'],
-            "name": "Collect Block",
-            #"class_callable": GhostBlock,
-            "drop_zone_nr": 1,
-            "img_name": kwargs['img']
-        }
+            obj = kwargs['replace_objects'][i_rep]
+            if obj['location'] != obj['init_loc']:
+                obj2 =  grid_world.environment_objects[obj['obj_id']]
+                grid_world.remove_from_grid(object_id=obj['obj_id'])
+                props = obj2.change_property('location',obj['init_loc'])
+                print(props)
+                grid_world._register_env_object(obj2)
 
-        # merge the two sets of agent body properties
-        #body_args = dict(kwargs['body_args'])
-        #body_args.update(obj_body_args)
+        for i_rem in range(len(kwargs['remove_objects'])):
 
-        # create the agent_body
-        #env_object = grid_world.__create_env_object(obj_body_args)
-        env_object = GhostBlock(**obj_body_args)
-
-        # register the new object
-        grid_world._register_env_object(env_object)
-
-        return AddObjectResult(AddObjectResult.ACTION_SUCCEEDED, True)
+            grid_world.remove_from_grid(kwargs['remove_objects'][i_rem]['obj_id'])
 
 
-class AddObjectResult(ActionResult):
+        for i_add in range(len(kwargs['add_objects'])):
+
+            obj_body_args = {
+                "location": kwargs['add_objects'][i_add]['location'],
+                "name": "Collect Product",
+                #"class_callable": GhostBlock,
+                "drop_zone_nr": kwargs['add_objects'][i_add]['drop_zone_nr'],
+                "img_name": kwargs['add_objects'][i_add]['img']
+            }
+
+            env_object = GhostProduct(**obj_body_args)
+
+            grid_world._register_env_object(env_object)
+
+
+        return ReplaceProductResult(ReplaceProductResult.ACTION_SUCCEEDED, True)
+
+
+class ReplaceProductResult(ActionResult):
     """ Result when assignment failed """
     # failed
     NO_AGENTBRAIN = "No object passed under the `agentbrain` key in kwargs"
@@ -236,4 +218,3 @@ class AddObjectResult(ActionResult):
 
     def __init__(self, result, succeeded):
         super().__init__(result, succeeded)
-
