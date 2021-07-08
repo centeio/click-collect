@@ -8,7 +8,7 @@ from matrx.messages.message import Message # type: ignore
 from matrx.agents.agent_brain import AgentBrain
 from matrx.objects import EnvObject, env_object # type: ignore
 
-from tasks.task import pool, nr_clicks
+from tasks.task import pool
 from world1.objects import GhostProduct, CollectableProduct
 
 #from bw4t.BW4TBrain import BW4TBrain
@@ -34,12 +34,18 @@ class ShopAssist(AgentBrain):
         self.drop_zone_nr = drop_zone_nr
         self.task_required = None
         self.new_task = False
+        self.update_score = None
    
     
     #override
     def filter_observations(self, state):
+        global unsucess_done_points, sucess_done_points
+        self.update_score = None
 
         for msg in self.received_messages:
+            human = state.get_agents_with_property({'name': 'human'})[0]
+            print(human)
+
 
             print("agent",self.agent_id,"received message:",msg)
 
@@ -51,7 +57,7 @@ class ShopAssist(AgentBrain):
                         request = msg.split()
                         agent_id = request[1]
                         if agent_id == self.id:
-                            self.task_required.accept()
+                            self.task_required.accept(human['nr_moves'])
                         else:
                             self.task_required.discard()
                             self.task_required = None
@@ -59,14 +65,23 @@ class ShopAssist(AgentBrain):
                 elif self.task_required.status == "ACCEPTED":
 
                     if msg.startswith(DONE):
-                        success, score = self.check_success(state)
-                        self.task_required.done(success, score)
+                        success, nr_prod = self.check_success(state)
+
+                        if success:
+                            self.update_score = human['score'] + self.task_required.success_done_score
+                        else:
+                            self.update_score = human['score'] + self.task_required.unsuccess_done_score
+
+                        self.task_required.done(success, nr_prod, human['nr_moves'])
                         self.task_required = None
 
                     elif msg.startswith(GIVEUP):
-                        success, score = self.check_success(state)
-                        self.task_required.giveup(success, score)
+                        success, nr_prod = self.check_success(state)
+                        self.task_required.giveup(success, nr_prod, human['nr_moves'])
                         self.task_required = None
+
+                    
+
 
         # present task
         if self.task_required == None:
@@ -106,7 +121,7 @@ class ShopAssist(AgentBrain):
 
                 previous_objs = state.get_with_property({'is_collectable': False, 'location': p_loc})
                 if previous_objs != None:
-                    print("::::::::: PREVIOUS TAKS OBJS ::::::::", previous_objs)
+                    #print("::::::::: PREVIOUS TAKS OBJS ::::::::", previous_objs)
                     remove_objects += [previous_objs[0]]
 
             for i in range(len(self.task_required.products)):
@@ -126,13 +141,14 @@ class ShopAssist(AgentBrain):
         action_kwargs["remove_objects"] = remove_objects
         action_kwargs["replace_objects"] = replace_objects
         action_kwargs["add_objects"] = add_objects
+        action_kwargs["human_id"] = state.get_agents_with_property({'name': 'human'})[0]['obj_id']
+        action_kwargs['update_score'] = self.update_score
 
         return action, action_kwargs
 
 
 
     def check_success(self, state:State):
-        #TODO
         n_prod = len(self.task_required.products)
         loc_x, loc_y = state[self.agent_id]['location']
 
@@ -172,8 +188,11 @@ class ReplaceProduct(Action):
 
 
     def mutate(self, grid_world, agent_id, **kwargs):
+        # update human's score
+        if kwargs['update_score'] != None:
+            human = grid_world.registered_agents[kwargs['human_id']]
+            human.change_property('score', kwargs['update_score'])
 
-        #TODO for each prod in remove_obj, put it back in original position ()
 
         for i_rep in range(len(kwargs['replace_objects'])):
 

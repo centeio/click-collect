@@ -16,14 +16,15 @@ class TaskMaker(AgentBrain):
     """
     Agent that creates new tasks for taskpool
     """
-    def __init__(self):
+    def __init__(self,logger_name):
         super().__init__(memorize_for_ticks=None)
+        self.logger_name = logger_name
 
  
     def create_task(self):
         global i_task 
 
-        new_task = Task(products = self.agent_properties["custom_properties"]["tasks"][i_task])
+        new_task = Task(self.logger_name, products = self.agent_properties["custom_properties"]["tasks"][i_task])
 
         pool.put(new_task)
 

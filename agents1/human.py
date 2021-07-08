@@ -9,15 +9,14 @@ import warnings
 from matrx.agents import HumanAgentBrain
 from matrx.actions.object_actions import GrabObject, DropObject, RemoveObject
 from matrx.actions.door_actions import OpenDoorAction, CloseDoorAction
+from matrx.actions.move_actions import MoveActionResult, MoveNorth, MoveNorthEast, MoveSouthEast, MoveSouth, \
+    MoveSouthWest, MoveWest, MoveNorthWest, MoveEast
 from matrx.agents.agent_utils.state import State
 from matrx.agents.agent_utils.state_tracker import StateTracker
 from matrx.agents.agent_brain import AgentBrain
 from matrx.messages import Message
 
 import numpy as np
-
-from tasks.task import nr_clicks
-
 
 class Human(HumanAgentBrain):
     """ Creates an Human Agent which is an agent that can be controlled by a
@@ -43,13 +42,8 @@ class Human(HumanAgentBrain):
         self.__remove_range = remove_range
 
 
-    def increase_score(self, points):
-        self.score += points
-
-    def decrease_score(self, points):
-        self.score -= points
-        if self.score < 0:
-            self.score = 0
+    def update_score(self, points):
+        self.agent_properties['score'] += points
 
     def _factory_initialise(self, agent_name, agent_id, action_set,
                             sense_capability, agent_properties,
@@ -244,7 +238,6 @@ class Human(HumanAgentBrain):
         """
         action = None
         action_kwargs = {}
-        #global nr_clicks
 
 
         # if no keys were pressed, do nothing
@@ -256,7 +249,6 @@ class Human(HumanAgentBrain):
         pressed_keys = user_input[-1]
         action = self.key_action_map[pressed_keys]
 
-        #nr_clicks += 1
 
         # if the user chose a grab action, choose an object within a grab_range
         # of 1
@@ -317,6 +309,12 @@ class Human(HumanAgentBrain):
             if len(doors_in_range) > 0:
                 action_kwargs['object_id'] = \
                     self.rnd_gen.choice(doors_in_range)
+
+        elif action == MoveNorth.__name__ \
+            or action == MoveSouth.__name__ \
+                or action == MoveWest.__name__ \
+                    or action == MoveEast.__name__:
+            self.agent_properties['nr_moves'] += 1
 
         return action, action_kwargs
 

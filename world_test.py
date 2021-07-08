@@ -169,15 +169,20 @@ def add_agents(builder):
 
 
 
-def create_tasks(builder):
+def create_tasks(builder,logger_name):
     sense_capability = SenseCapability({None: 50})
 
     f = open("tasks.txt", "w")
     f2 = open("products.txt", "w")
+    logger = open(logger_name,"w")
+
+    logger.write("current_time,task_id,nr_products,agent,nr_moves_start,nr_moves_end,presented_time,time_start,time_end,completed_prod,status,score,success,success_done_points,unsuccess_done_points\n")
+    logger.close() 
 
     world_products = [x['custom_properties']['img_name'] for x in builder.object_settings if x['callable_class'] == CollectableProduct ]
 
     f2.write(str(world_products))
+    f2.close()
 
     tasks = []
 
@@ -187,19 +192,21 @@ def create_tasks(builder):
         tasks += [products]
         msg = str(products) + "\n"
         f.write(msg)
-
+    
+    f.close()
 
     loc = [26,19]
 
-    builder.add_agent(loc, TaskMaker(), team="team_name", name = "taskmaker1", sense_capability=sense_capability, 
+    builder.add_agent(loc, TaskMaker(logger_name), team="team_name", name = "taskmaker1", sense_capability=sense_capability, 
                 visualize_opacity=0.0, custom_properties = {"tasks": tasks})
 
                 #TODO check tasks structure. is array creating the error?
 
     print("FINISHED CREATING TASK MAKER")
 
-    f.close()
-    f2.close()
+    
+    
+    
 
 
 
@@ -231,7 +238,7 @@ class CollectionGoal(WorldGoal):
     # def __check_completion(self, grid_world):
 
 
-def create_builder():
+def create_builder(logger_name):
     tick_dur = 0.1
 
     goal = CollectionGoal(10000)
@@ -262,7 +269,7 @@ def create_builder():
 
     add_agents(builder)
 
-    create_tasks(builder)
+    create_tasks(builder, logger_name)
 
     # add human agent
     key_action_map = {
@@ -277,8 +284,10 @@ def create_builder():
     sense_capability_h = SenseCapability({CollectableProduct: 2, GhostProduct:2, None:50}, )
 
     human_brain = Human(max_carry_objects=3, grab_range=0)
-    builder.add_human_agent([20, 2], human_brain, team="Team 1", name="human",
-                            key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/images/smile.png")
+    builder.add_human_agent([20, 2], human_brain, team="Team 1", name="human", 
+                            customizable_properties = ['nr_moves', 'score'],
+                            key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/images/smile.png", 
+                            nr_moves=0, score=0)
                             #key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/static/images/transparent.png")
 #            builder.add_agent(loc, brain, team=team_name, name=agent['name'],
 #                sense_capability=sense_capability)
@@ -288,7 +297,10 @@ def create_builder():
 
  
 if __name__ == "__main__":
-    builder = create_builder()
+    #TODO pass name of logger
+    logger_name = "test.csv"
+
+    builder = create_builder(logger_name)
 
     #media_folder = os.path.dirname(os.path.join(script_dir, "images"))
     media_folder = os.path.abspath(os.path.join(script_dir, "media"))

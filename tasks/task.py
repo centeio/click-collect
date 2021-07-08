@@ -6,28 +6,36 @@ min_pool_size = 5
 n_types_task = 3
 ids = 0
 points = 2
-nr_clicks = 0
+
 
 class Task():
-    def __init__(self, products):
+    def __init__(self, logger_filename, products):
         global ids
         self.id = ids
         ids += 1
+
+        self.logger_filename = logger_filename
+
         self.agent = None
         self.human = None
 
         self.presented_time = None
         self.time_start = None
         self.time_end = None
-        self.nr_clicks_start = 0
-        self.nr_clicks_start = 0
+        self.nr_moves_start = None
+        self.nr_moves_end = None
 
         self.products = products
         self.nr_products = len(products)
-        self.max_score = points * self.nr_products
 
-        self.completed_prod = 0
-        self.success = False
+        self.completed_prod = None
+        self.success = None
+
+        self.success_done_score = points * self.nr_products
+        self.unsuccess_done_score = -5
+        self.give_up_score = 0
+
+        self.score = None
 
         self.status = None #possible values are None, PRESENTED, ACCEPTED, DISCARDED, GIVEUP, SUCCESSDONE, UNSUCCESSDONE
 
@@ -37,11 +45,11 @@ class Task():
         self.presented_time = time.time()
         self.print_task()
         
-    def accept(self):
-        global nr_clicks
+    def accept(self, nr_moves):
+        self.nr_moves_start = nr_moves
         self.status = "ACCEPTED"
         self.time_start = time.time()
-        nr_clicks = 0
+
         self.print_task()
 
     def discard(self):
@@ -49,22 +57,35 @@ class Task():
         self.time_end = time.time()
         self.print_task()
 
-    def done(self, success, score):
+    def done(self, success, nr_prod, nr_moves):
         self.success = success
+        self.completed_prod = nr_prod
+        self.nr_moves_ends = nr_moves
+
         if success:
             self.status = "SUCCESSDONE"
+            self.score = self.success_done_score
         else:
             self.status = "UNSUCCESSDONE"
+            self.score = self.unsuccess_done_score
         self.time_end = time.time()
         self.print_task()
 
-    def giveup(self, success, score):
+    def giveup(self, success, nr_prod, nr_moves):
         self.status = "GIVEUP"
         self.success = success
-        self.completed_prod = score
+        self.completed_prod = nr_prod
         self.time_end = time.time()
+        self.nr_moves_ends = nr_moves
+        self.score = self.give_up_score
         self.print_task()
 
     def print_task(self):
-        #TODO log task
+        logger = open(self.logger_filename, "a")  # append mode
+        #"current_time,task,n_prods,min_path,agent,n_moves,presented_time,time_start,time_end,prod_completed,status,success"
+        logger.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(time.time(),self.id, self.nr_products, self.agent, \
+            self.nr_moves_start, self.nr_moves_end, self.presented_time, self.time_start, self.time_end, \
+                self.completed_prod, self.status, self.score, self.success, \
+                    self.success_done_score, self.unsuccess_done_score))
+        logger.close()        
         return None
