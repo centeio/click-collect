@@ -119,6 +119,7 @@ def add_dropoffs2(builder):
 
 def add_products(builder, room_locations):
     room_nr = 0
+    prod_locations = {}
 
     np.random.seed(10)
 
@@ -135,6 +136,8 @@ def add_products(builder, room_locations):
 
             loc = locations[i]
             image = "/images/" + theme + "/" + images_path[i]
+
+            prod_locations[image] = loc
         
             # Get the block's name
             name = f"Object {theme} in {room_name}"
@@ -144,6 +147,8 @@ def add_products(builder, room_locations):
             builder.add_object(loc, name, callable_class=CollectableProduct, img_name=image)
 
         room_nr += 1
+
+    return prod_locations
 
 
 def add_agents(builder):
@@ -169,7 +174,7 @@ def add_agents(builder):
 
 
 
-def create_tasks(builder,logger_name):
+def create_tasks(builder, logger_name, prod_locations):
     sense_capability = SenseCapability({None: 50})
 
     f = open("tasks.txt", "w")
@@ -195,19 +200,15 @@ def create_tasks(builder,logger_name):
     
     f.close()
 
-    loc = [26,19]
+    loc = [26,14]
 
-    builder.add_agent(loc, TaskMaker(logger_name), team="team_name", name = "taskmaker1", sense_capability=sense_capability, 
+    possible_actions = [MoveNorth.__name__, MoveEast.__name__, MoveSouth.__name__, MoveWest.__name__]
+
+    builder.add_agent(loc, TaskMaker(logger_name, prod_locations, action_set = possible_actions), team="team_name", name = "taskmaker1", sense_capability=sense_capability, 
                 visualize_opacity=0.0, custom_properties = {"tasks": tasks})
 
-                #TODO check tasks structure. is array creating the error?
 
     print("FINISHED CREATING TASK MAKER")
-
-    
-    
-    
-
 
 
 class CollectionGoal(WorldGoal):
@@ -239,7 +240,7 @@ class CollectionGoal(WorldGoal):
 
 
 def create_builder(logger_name):
-    tick_dur = 0.1
+    tick_dur = 0.0
 
     goal = CollectionGoal(10000)
 
@@ -264,12 +265,12 @@ def create_builder(logger_name):
     add_dropoffs2(builder)
 
     time.sleep(3)
-    add_products(builder, rooms_locations)
+    prod_locations = add_products(builder, rooms_locations)
     #add_blocks(builder, rooms_locations)
 
     add_agents(builder)
 
-    create_tasks(builder, logger_name)
+    create_tasks(builder, logger_name, prod_locations)
 
     # add human agent
     key_action_map = {
