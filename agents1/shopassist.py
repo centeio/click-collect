@@ -28,10 +28,11 @@ class ShopAssist(AgentBrain):
     and replies 'welcome '+ID to all received messages.
     It checks that received welcomes are indeed using my own ID
     """
-    def __init__(self,name,drop_zone_nr):
+    def __init__(self,name,drop_zone_nr,drop_zone_size):
         super().__init__(memorize_for_ticks=None)
         self.id = name
         self.drop_zone_nr = drop_zone_nr
+        self.drop_zone_size = drop_zone_size
         self.task_required = None
         self.new_task = False
         self.update_score = None
@@ -85,7 +86,6 @@ class ShopAssist(AgentBrain):
 
         # present task
         if self.task_required == None:
-            #TODO
             global pool
 
             if not pool.empty():
@@ -116,7 +116,7 @@ class ShopAssist(AgentBrain):
                 #print("::::::::: DROPPED FOUND ::::::::", dropped_found)
                 replace_objects += dropped_found
 
-            for i in range(5): #TODO get this number from somewhere else
+            for i in range(self.drop_zone_size): 
                 p_loc = (loc_x + i - 1, loc_y + 1)
 
                 previous_objs = state.get_with_property({'is_collectable': False, 'location': p_loc})

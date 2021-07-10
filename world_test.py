@@ -40,6 +40,7 @@ block_size = 0.5
 #nr_drop_zones = 1
 #nr_blocks_needed = 3
 hallway_space = 2 # width, height of corridors
+drop_zone_size = 5
 
 agent_sense_range = 2  # the range with which agents detect other agents
 block_sense_range = 2  # the range with which agents detect blocks
@@ -163,22 +164,23 @@ def add_agents(builder):
 
     loc = [25,9] # agents start in horizontal row at top left corner.
 
-    builder.add_agent(loc, ShopAssist(name="x",drop_zone_nr=1), name="Agent X",
+    builder.add_agent(loc, ShopAssist(name="x",drop_zone_nr=1, drop_zone_size = drop_zone_size), name="Agent X",
 #                sense_capability=sense_capability)
             sense_capability=sense_capability, img_name="/images/smile_glasses.png")
 
     loc = [25,19] # agents start in horizontal row at top left corner.
-    builder.add_agent(loc, ShopAssist(name="z",drop_zone_nr=2), name="Agent Z", 
+    builder.add_agent(loc, ShopAssist(name="z",drop_zone_nr=2, drop_zone_size = drop_zone_size), name="Agent Z", 
 #                sense_capability=sense_capability)
             sense_capability=sense_capability, img_name="/images/smile_glasses.png")
 
 
 
-def create_tasks(builder, logger_name, prod_locations):
+def create_tasks(builder, folder_name, prod_locations):
     sense_capability = SenseCapability({None: 50})
 
-    f = open("tasks.txt", "w")
-    f2 = open("products.txt", "w")
+    f = open(folder_name + "/" + "tasks.txt", "w")
+    f2 = open(folder_name + "/" + "products.txt", "w")
+    logger_name = folder_name + "/" + "logger.csv"
     logger = open(logger_name,"w")
 
     logger.write("current_time,task_id,nr_products,agent,nr_moves_start,nr_moves_end,presented_time,time_start,time_end,completed_prod,status,score,success,success_done_points,unsuccess_done_points\n")
@@ -239,7 +241,7 @@ class CollectionGoal(WorldGoal):
     # def __check_completion(self, grid_world):
 
 
-def create_builder(logger_name):
+def create_builder(folder_name):
     tick_dur = 0.0
 
     goal = CollectionGoal(10000)
@@ -270,7 +272,7 @@ def create_builder(logger_name):
 
     add_agents(builder)
 
-    create_tasks(builder, logger_name, prod_locations)
+    create_tasks(builder, folder_name, prod_locations)
 
     # add human agent
     key_action_map = {
@@ -298,10 +300,14 @@ def create_builder(logger_name):
 
  
 if __name__ == "__main__":
-    #TODO pass name of logger
-    logger_name = "test.csv"
+    t = (2021, 7, 8, 8, 0, 0, 0, 0, 0)
 
-    builder = create_builder(logger_name)
+    local_time = time.mktime(t)
+
+    folder_name = "logger" + "/" + str(time.time() - local_time)
+    os.makedirs(os.path.abspath(os.path.join(script_dir, folder_name)))
+
+    builder = create_builder(folder_name)
 
     #media_folder = os.path.dirname(os.path.join(script_dir, "images"))
     media_folder = os.path.abspath(os.path.join(script_dir, "media"))
