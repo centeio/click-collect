@@ -9,12 +9,13 @@ points = 2
 
 
 class Task():
-    def __init__(self, logger_filename, products, difficulty_heuristic):
+    def __init__(self, logger_filename, products, difficulty_heuristic, mode):
         global ids
         self.id = ids
         ids += 1
 
         self.logger_filename = logger_filename
+        self.mode = mode
 
         self.agent = None
         self.human = None
@@ -84,9 +85,9 @@ class Task():
     def print_task(self):
         logger = open(self.logger_filename, "a")  # append mode
         #"current_time,task,n_prods,min_path,agent,n_moves,presented_time,time_start,time_end,prod_completed,status,success"
-        logger.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(time.time(),self.id, self.nr_products, self.agent, \
+        logger.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(time.time(),self.id, self.nr_products, self.agent, \
             self.nr_moves_start, self.nr_moves_end, self.presented_time, self.time_start, self.time_end, \
                 self.completed_prod, self.status, self.score, self.success, \
-                    self.success_done_score, self.unsuccess_done_score, self.difficulty_heuristic))
+                    self.success_done_score, self.unsuccess_done_score, self.difficulty_heuristic, self.mode))
         logger.close()        
         return None

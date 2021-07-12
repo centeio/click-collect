@@ -28,7 +28,7 @@ class ShopAssist(AgentBrain):
     and replies 'welcome '+ID to all received messages.
     It checks that received welcomes are indeed using my own ID
     """
-    def __init__(self,name,drop_zone_nr,drop_zone_size):
+    def __init__(self,name,drop_zone_nr,drop_zone_size,friendly_writing):
         super().__init__(memorize_for_ticks=None)
         self.id = name
         self.drop_zone_nr = drop_zone_nr
@@ -36,6 +36,8 @@ class ShopAssist(AgentBrain):
         self.task_required = None
         self.new_task = False
         self.update_score = None
+        self.friendly_writing = friendly_writing
+        # TODO do something with friendly writing
    
     
     #override

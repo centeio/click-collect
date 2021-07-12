@@ -21,7 +21,7 @@ class TaskMaker(AgentBrain):
     EUCLIDEAN_METRIC = "euclidean"
     MANHATTAN_METRIC = "manhattan" 
 
-    def __init__(self, logger_name, prod_locations, action_set, metric = MANHATTAN_METRIC):
+    def __init__(self, logger_name, prod_locations, action_set, metric = MANHATTAN_METRIC, mode = "normal"):
         super().__init__(memorize_for_ticks=None)
         self.logger_name = logger_name
         self.prod_locations = prod_locations
@@ -72,6 +72,7 @@ class TaskMaker(AgentBrain):
             return move_actions
 
         self.move_actions = get_move_actions(action_set)
+        self.mode = mode
  
     def create_task(self, state):
         global i_task 
@@ -90,7 +91,7 @@ class TaskMaker(AgentBrain):
             task_score += len(route)
             start_point = prod_loc
 
-        new_task = Task(self.logger_name, products = products, difficulty_heuristic = task_score)
+        new_task = Task(self.logger_name, products = products, difficulty_heuristic = task_score, mode = self.mode)
 
         pool.put(new_task)
 

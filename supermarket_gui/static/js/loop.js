@@ -44,6 +44,8 @@ var lv_base_url = window.location.hostname,
     lv_agent_id = "",
     lv_agent_type = null;
 
+var lv_current_human_score = 0
+
 // check if message offsets are defined and used in gen_grid.js
 if (typeof chat_offsets !== 'undefined') {
     var chat_offsets = {};
@@ -207,6 +209,10 @@ function world_loop() {
         return;
     }
 
+    // update score
+    document.getElementById('human_score').innerHTML = "score: " + lv_current_human_score;
+
+
     // if MATRX didn't have a state update yet, wait for the next frame and check again at that time
     if (!lv_to_update_or_not_to_update) {
         request_new_frame();
@@ -289,6 +295,7 @@ function get_MATRX_update() {
 
             // decode lv_state and other info from the request
             lv_state = data['states'][data['states'].length - 1][lv_agent_id]['state'];
+            // console.log(lv_state)
             var lv_new_tick = lv_state['World']['nr_ticks'];
             curr_tick_timestamp = lv_state['World']['curr_tick_timestamp'];
             lv_tick_duration = lv_state['World']['tick_duration'];
@@ -309,6 +316,9 @@ function get_MATRX_update() {
 
             // note our new current tick
             lv_current_tick = lv_new_tick;
+
+            // current score
+            lv_current_human_score = lv_state['human']['score']
 
             // make sure to synchronize the play/pause button of the frontend with the current MATRX version
             var matrx_paused = data.matrx_paused;
