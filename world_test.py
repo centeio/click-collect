@@ -200,7 +200,7 @@ def create_tasks(builder, folder_name, prod_locations):
 
     tasks = []
 
-    for i in range(20):
+    for i in range(100):
         n_items = np.random.choice(list(range(4))) + 1
         products = np.random.choice(world_products,n_items).tolist()
         tasks += [products]
@@ -300,7 +300,7 @@ def create_builder(folder_name, mode):
         sense_capability_h = SenseCapability({CollectableProduct: 2, GhostProduct:2, None:50})
 
     if mode == "benevolence":
-        human_img = "/images/smile_ben.png"
+        human_img = "/images/smile_bene.png"
     else:
         human_img = "/images/smile.png"
 
@@ -318,12 +318,12 @@ def create_builder(folder_name, mode):
 
  
 if __name__ == "__main__":
-    modes = ["ability","benevolence","integrity"]
+    modes = ["ability","benevolence","integrity","normal","trial"]
     print("arg:", len(sys.argv), str(sys.argv))
 
 
-    if len(sys.argv) != 2 or sys.argv[1] not in modes+["normal"]:
-        raise Exception("Please specify one argument: 'random', 'benevolence', 'integrity' or 'normal'.")
+    if len(sys.argv) != 2 or sys.argv[1] not in modes:
+        raise Exception("Please specify one argument: 'random', 'benevolence', 'integrity', 'normal' or 'trial'.")
 
     mode = sys.argv[1]
 
@@ -333,15 +333,13 @@ if __name__ == "__main__":
         modes = ["ability","benevolence","integrity"]
         mode = np.random.choice(modes)
    
-
-    #TODO mode integrity
     #TODO show team score ? 
 
     t = (2021, 7, 8, 8, 0, 0, 0, 0, 0)
 
-    local_time = time.mktime(t)
+    local_time = int(time.mktime(t))
 
-    folder_name = "logger" + "/" + str(time.time() - local_time)
+    folder_name = "logger" + "/" + str(int(time.time()) - local_time)
     os.makedirs(os.path.abspath(os.path.join(script_dir, folder_name)))
 
     builder = create_builder(folder_name, mode)

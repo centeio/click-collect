@@ -37,18 +37,17 @@ class ShopAssist(AgentBrain):
         self.new_task = False
         self.update_score = None
         self.friendly_writing = friendly_writing
-        # TODO do something with friendly writing
+        self.welcome = False
    
     
     #override
     def filter_observations(self, state):
         global unsucess_done_points, sucess_done_points
         self.update_score = None
+        send_msg = None
 
         for msg in self.received_messages:
             human = state.get_agents_with_property({'name': 'human'})[0]
-            print(human)
-
 
             print("agent",self.agent_id,"received message:",msg)
 
@@ -61,6 +60,8 @@ class ShopAssist(AgentBrain):
                         agent_id = request[1]
                         if agent_id == self.id:
                             self.task_required.accept(human['nr_moves'])
+                            if self.friendly_writing:
+                                send_msg = "Thanks!"
                         else:
                             self.task_required.discard()
                             self.task_required = None
@@ -77,13 +78,19 @@ class ShopAssist(AgentBrain):
 
                         self.task_required.done(success, nr_prod, human['nr_moves'])
                         self.task_required = None
+                        if self.friendly_writing:
+                            send_msg = "Great job!"
 
                     elif msg.startswith(GIVEUP):
                         success, nr_prod = self.check_success(state)
                         self.task_required.giveup(success, nr_prod, human['nr_moves'])
                         self.task_required = None
+                        if self.friendly_writing:
+                            send_msg = "No problem!"
 
-                    
+            if send_msg != None:
+                self.send_message(Message(send_msg, from_id=self.agent_id))
+            
 
 
         # present task
@@ -108,6 +115,16 @@ class ShopAssist(AgentBrain):
         replace_objects = []
         remove_objects = []
         add_objects = []
+
+        if self.welcome == False:
+
+            if self.friendly_writing == True:
+                new_task_msg = "Hi buddy! I'm glad we will be working together again today!"
+            else:
+                new_task_msg = "Hi there"
+
+            self.send_message(Message(new_task_msg, from_id=self.agent_id))
+            self.welcome = True
 
         if self.new_task == True:
             action = ReplaceProduct.__name__
@@ -136,7 +153,10 @@ class ShopAssist(AgentBrain):
 
                 add_objects += [obj_kwargs]
 
-            new_task_msg = "New task!"
+            if self.friendly_writing == True:
+                new_task_msg = "I have a new task. Can you help please?"
+            else:
+                new_task_msg = "New task!"
             self.send_message(Message(new_task_msg, from_id=self.agent_id))
             self.new_task = False
 
