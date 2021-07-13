@@ -38,6 +38,7 @@ class Task():
         self.give_up_score = 0
 
         self.score = None
+        self.team_score = None
 
         self.status = None #possible values are None, PRESENTED, ACCEPTED, DISCARDED, GIVEUP, SUCCESSDONE, UNSUCCESSDONE
 
@@ -57,6 +58,7 @@ class Task():
     def discard(self):
         self.status = "DISCARDED"
         self.time_end = time.time()
+        self.team_score = self.success_done_score
         self.print_task()
 
     def done(self, success, nr_prod, nr_moves):
@@ -67,9 +69,11 @@ class Task():
         if success:
             self.status = "SUCCESSDONE"
             self.score = self.success_done_score
+            self.team_score = self.success_done_score
         else:
             self.status = "UNSUCCESSDONE"
             self.score = self.unsuccess_done_score
+            self.team_score = self.unsuccess_done_score
         self.time_end = time.time()
         self.print_task()
 
@@ -85,9 +89,9 @@ class Task():
     def print_task(self):
         logger = open(self.logger_filename, "a")  # append mode
         #"current_time,task,n_prods,min_path,agent,n_moves,presented_time,time_start,time_end,prod_completed,status,success"
-        logger.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(time.time(),self.id, self.nr_products, self.agent, \
+        logger.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(time.time(),self.id, self.nr_products, self.agent, \
             self.nr_moves_start, self.nr_moves_end, self.presented_time, self.time_start, self.time_end, \
                 self.completed_prod, self.status, self.score, self.success, \
-                    self.success_done_score, self.unsuccess_done_score, self.difficulty_heuristic, self.mode))
+                    self.success_done_score, self.unsuccess_done_score, self.difficulty_heuristic, self.mode, self.team_score))
         logger.close()        
         return None

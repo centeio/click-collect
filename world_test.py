@@ -190,7 +190,7 @@ def create_tasks(builder, folder_name, prod_locations):
     logger_name = folder_name + "/" + "logger.csv"
     logger = open(logger_name,"w")
 
-    logger.write("current_time,task_id,nr_products,agent,nr_moves_start,nr_moves_end,presented_time,time_start,time_end,completed_prod,status,score,success,success_done_points,unsuccess_done_points,shortest_path,mode\n")
+    logger.write("current_time,task_id,nr_products,agent,nr_moves_start,nr_moves_end,presented_time,time_start,time_end,completed_prod,status,score,success,success_done_points,unsuccess_done_points,shortest_path,mode,team_score\n")
     logger.close() 
 
     world_products = [x['custom_properties']['img_name'] for x in builder.object_settings if x['callable_class'] == CollectableProduct ]
@@ -306,9 +306,9 @@ def create_builder(folder_name, mode):
 
     human_brain = Human(max_carry_objects=3, grab_range=0)
     builder.add_human_agent([22,15], human_brain, team="Team 1", name="human", 
-                            customizable_properties = ['nr_moves', 'score'],
+                            customizable_properties = ['nr_moves', 'score', 'team_score'],
                             key_action_map=key_action_map, sense_capability=sense_capability_h, img_name=human_img, 
-                            nr_moves=0, score=0)
+                            nr_moves=0, score=0, team_score=0)
                             #key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/static/images/transparent.png")
 #            builder.add_agent(loc, brain, team=team_name, name=agent['name'],
 #                sense_capability=sense_capability)

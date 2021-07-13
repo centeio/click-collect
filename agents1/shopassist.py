@@ -35,7 +35,8 @@ class ShopAssist(AgentBrain):
         self.drop_zone_size = drop_zone_size
         self.task_required = None
         self.new_task = False
-        self.update_score = None
+        self.update_human_score = None
+        self.update_team_score = None
         self.friendly_writing = friendly_writing
         self.welcome = False
    
@@ -43,7 +44,7 @@ class ShopAssist(AgentBrain):
     #override
     def filter_observations(self, state):
         global unsucess_done_points, sucess_done_points
-        self.update_score = None
+        self.update_human_score = None
         send_msg = None
 
         for msg in self.received_messages:
@@ -63,6 +64,7 @@ class ShopAssist(AgentBrain):
                             if self.friendly_writing:
                                 send_msg = "Thanks!"
                         else:
+                            self.update_team_score = human['team_score'] + self.task_required.success_done_score
                             self.task_required.discard()
                             self.task_required = None
                 
@@ -70,11 +72,13 @@ class ShopAssist(AgentBrain):
 
                     if msg.startswith(DONE):
                         success, nr_prod = self.check_success(state)
-
+                        #TODO check scores team vs human
                         if success:
-                            self.update_score = human['score'] + self.task_required.success_done_score
+                            self.update_human_score = human['score'] + self.task_required.success_done_score
+                            self.update_team_score = human['team_score'] + self.task_required.success_done_score
                         else:
-                            self.update_score = human['score'] + self.task_required.unsuccess_done_score
+                            self.update_human_score = human['score'] + self.task_required.unsuccess_done_score
+                            self.update_team_score = human['team_score'] + self.task_required.unsuccess_done_score
 
                         self.task_required.done(success, nr_prod, human['nr_moves'])
                         self.task_required = None
@@ -164,7 +168,8 @@ class ShopAssist(AgentBrain):
         action_kwargs["replace_objects"] = replace_objects
         action_kwargs["add_objects"] = add_objects
         action_kwargs["human_id"] = state.get_agents_with_property({'name': 'human'})[0]['obj_id']
-        action_kwargs['update_score'] = self.update_score
+        action_kwargs['update_human_score'] = self.update_human_score
+        action_kwargs['update_team_score'] = self.update_team_score
 
         return action, action_kwargs
 
@@ -211,9 +216,13 @@ class ReplaceProduct(Action):
 
     def mutate(self, grid_world, agent_id, **kwargs):
         # update human's score
-        if kwargs['update_score'] != None:
+        if kwargs['update_human_score'] != None:
             human = grid_world.registered_agents[kwargs['human_id']]
-            human.change_property('score', kwargs['update_score'])
+            human.change_property('score', kwargs['update_human_score'])
+
+        if kwargs['update_team_score'] != None:
+            human = grid_world.registered_agents[kwargs['human_id']]
+            human.change_property('team_score', kwargs['update_team_score'])
 
 
         for i_rep in range(len(kwargs['replace_objects'])):

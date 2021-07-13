@@ -45,6 +45,7 @@ var lv_base_url = window.location.hostname,
     lv_agent_type = null;
 
 var lv_current_human_score = 0
+var lv_current_team_score = 0
 
 // check if message offsets are defined and used in gen_grid.js
 if (typeof chat_offsets !== 'undefined') {
@@ -210,7 +211,8 @@ function world_loop() {
     }
 
     // update score
-    document.getElementById('human_score').innerHTML = "score: " + lv_current_human_score;
+    document.getElementById('human_score').innerHTML = "Personal score: " + lv_current_human_score;
+    document.getElementById('team_score').innerHTML = "Team score: " + lv_current_team_score;
 
 
     // if MATRX didn't have a state update yet, wait for the next frame and check again at that time
@@ -319,6 +321,7 @@ function get_MATRX_update() {
 
             // current score
             lv_current_human_score = lv_state['human']['score']
+            lv_current_team_score = lv_state['human']['team_score']
 
             // make sure to synchronize the play/pause button of the frontend with the current MATRX version
             var matrx_paused = data.matrx_paused;
