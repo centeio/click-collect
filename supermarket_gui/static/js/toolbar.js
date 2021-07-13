@@ -512,10 +512,10 @@ function send_message_start_task(message_x) {
     data = {"content":message_x, "sender": lv_agent_id, "receiver": current_chatwindow['receiver']}
     console.log("Sending message to matrx:", data);
     send_matrx_api_post_message(matrx_send_message_url, data);
-    document.getElementById("done").disabled = false;
-    document.getElementById("give_up").disabled = false;
-    document.getElementById("accept_task_x").disabled = true;
-    document.getElementById("accept_task_z").disabled = true;
+    //document.getElementById("done").disabled = false;
+    //document.getElementById("give_up").disabled = false;
+    //document.getElementById("accept_task_x").disabled = true;
+    //document.getElementById("accept_task_z").disabled = true;
 
 
 }
@@ -524,10 +524,10 @@ function send_message_end_task(message_x) {
     data = {"content":message_x, "sender": lv_agent_id, "receiver": current_chatwindow['receiver']}
     console.log("Sending message to matrx:", data);
     send_matrx_api_post_message(matrx_send_message_url, data);
-    document.getElementById("done").disabled = true;
-    document.getElementById("give_up").disabled = true;
-    document.getElementById("accept_task_x").disabled = false;
-    document.getElementById("accept_task_z").disabled = false;
+    //document.getElementById("done").disabled = true;
+    //document.getElementById("give_up").disabled = true;
+    //document.getElementById("accept_task_x").disabled = false;
+    //document.getElementById("accept_task_z").disabled = false;
 }
 
 /*

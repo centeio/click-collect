@@ -38,7 +38,8 @@ class ShopAssist(AgentBrain):
         self.update_human_score = None
         self.update_team_score = None
         self.friendly_writing = friendly_writing
-        self.welcome = False   
+        self.welcome = False
+        self.human_todo = "choose"
     
     #override
     def filter_observations(self, state):
@@ -46,7 +47,6 @@ class ShopAssist(AgentBrain):
         self.update_human_score = None
         send_msg = None
         human = state.get_agents_with_property({'name': 'human'})[0]
-        self.human_todo = None
 
         for msg in self.received_messages:
 
@@ -61,11 +61,11 @@ class ShopAssist(AgentBrain):
                         agent_id = request[1]
                         if agent_id == self.id:
                             self.task_required.accept(human['nr_moves'])
-                            self.human_todo = "finish"
                             if self.friendly_writing:
                                 send_msg = "Thanks!"
                         else:
                             self.update_team_score = human['team_score'] + self.task_required.success_done_score
+                            self.human_todo = "finish"
                             self.task_required.discard()
                             self.task_required = None
                 
@@ -84,8 +84,6 @@ class ShopAssist(AgentBrain):
                         if self.friendly_writing:
                             send_msg = "Great job!"
 
-                        self.human_todo = "choose"
-
                     elif msg.startswith(GIVEUP):
                         success, nr_prod = self.check_success(state)
                         self.update_human_score = human['score'] + self.task_required.give_up_score
@@ -95,7 +93,7 @@ class ShopAssist(AgentBrain):
                         if self.friendly_writing:
                             send_msg = "No problem!"
                     
-                        self.human_todo = "choose"
+                    self.human_todo = "choose"
 
             if send_msg != None:
                 self.send_message(Message(send_msg, from_id=self.agent_id))
@@ -177,6 +175,8 @@ class ShopAssist(AgentBrain):
         action_kwargs['update_human_score'] = self.update_human_score
         action_kwargs['update_team_score'] = self.update_team_score
         action_kwargs['todo'] = self.human_todo
+
+        self.human_todo = None
 
         return action, action_kwargs
 

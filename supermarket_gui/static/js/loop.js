@@ -219,9 +219,17 @@ function world_loop() {
     if (lv_status_todo == "choose") {
         document.getElementById('todo').innerHTML = "CHOOSE TASK!";
         document.getElementById('todo').style.color = "red";
+        document.getElementById("done").disabled = true;
+        document.getElementById("give_up").disabled = true;
+        document.getElementById("accept_task_x").disabled = false;
+        document.getElementById("accept_task_z").disabled = false;
     } else if (lv_status_todo == "finish") {
         document.getElementById('todo').innerHTML = "Finish task!";
         document.getElementById('todo').style.color = "white";
+        document.getElementById("done").disabled = false;
+        document.getElementById("give_up").disabled = false;
+        document.getElementById("accept_task_x").disabled = true;
+        document.getElementById("accept_task_z").disabled = true;
     }  
 
     // if MATRX didn't have a state update yet, wait for the next frame and check again at that time
