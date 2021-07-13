@@ -190,7 +190,7 @@ def create_tasks(builder, folder_name, prod_locations):
     logger_name = folder_name + "/" + "logger.csv"
     logger = open(logger_name,"w")
 
-    logger.write("current_time,folder,task_id,nr_products,agent,nr_moves_start,nr_moves_end,presented_time,time_start,time_end,completed_prod,status,score,team_score,success,success_done_points,unsuccess_done_points,give_up_points,shortest_path,mode\n")
+    logger.write("current_time,folder_name,task_id,agent,nr_moves,nr_products,difficulty_heuristic,nr_completed_prod,status,is_success,mode\n")
     logger.close() 
 
     world_products = [x['custom_properties']['img_name'] for x in builder.object_settings if x['callable_class'] == CollectableProduct ]

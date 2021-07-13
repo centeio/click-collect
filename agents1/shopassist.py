@@ -59,14 +59,17 @@ class ShopAssist(AgentBrain):
                     if msg.startswith(ACCEPT):
                         request = msg.split()
                         agent_id = request[1]
+                        success, nr_prod = self.check_success(state)
+
                         if agent_id == self.id:
-                            self.task_required.accept(human['nr_moves'])
+                            self.task_required.update(self.id, human['nr_moves'], success=success, completed_prod=nr_prod, status="ACCEPTED")
+
                             if self.friendly_writing:
                                 send_msg = "Thanks!"
                         else:
                             self.update_team_score = human['team_score'] + self.task_required.success_done_score
                             self.human_todo = "finish"
-                            self.task_required.discard()
+                            self.task_required.update(self.id, human['nr_moves'], success=success, completed_prod=nr_prod, status="DISCARDED")
                             self.task_required = None
                 
                 elif self.task_required.status == "ACCEPTED":
@@ -79,7 +82,7 @@ class ShopAssist(AgentBrain):
                         else:
                             self.update_human_score = human['score'] + self.task_required.unsuccess_done_score
                             self.update_team_score = human['team_score'] + self.task_required.unsuccess_done_score
-                        self.task_required.done(success, nr_prod, human['nr_moves'])
+                        self.task_required.update(self.id, human['nr_moves'], success=success, completed_prod=nr_prod, status="DONE")
                         self.task_required = None
                         if self.friendly_writing:
                             send_msg = "Great job!"
@@ -88,7 +91,7 @@ class ShopAssist(AgentBrain):
                         success, nr_prod = self.check_success(state)
                         self.update_human_score = human['score'] + self.task_required.give_up_score
                         self.update_team_score = human['team_score'] + self.task_required.give_up_score
-                        self.task_required.giveup(success, nr_prod, human['nr_moves'])
+                        self.task_required.update(self.id, human['nr_moves'], success=success, completed_prod=nr_prod, status="GIVEUP")
                         self.task_required = None
                         if self.friendly_writing:
                             send_msg = "No problem!"
@@ -106,7 +109,8 @@ class ShopAssist(AgentBrain):
 
             if not pool.empty():
                 self.task_required = pool.get()
-                self.task_required.presented(self.id)
+                #self.task_required.presented(self.id)
+                self.task_required.update(self.id, human['nr_moves'], success=False, completed_prod=0, status="PRESENTED")
                # self.p_i = 0
                 self.new_task = True
             else:
