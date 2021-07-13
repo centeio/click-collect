@@ -38,17 +38,17 @@ class ShopAssist(AgentBrain):
         self.update_human_score = None
         self.update_team_score = None
         self.friendly_writing = friendly_writing
-        self.welcome = False
-   
+        self.welcome = False   
     
     #override
     def filter_observations(self, state):
         global unsucess_done_points, sucess_done_points
         self.update_human_score = None
         send_msg = None
+        human = state.get_agents_with_property({'name': 'human'})[0]
+        self.human_todo = None
 
         for msg in self.received_messages:
-            human = state.get_agents_with_property({'name': 'human'})[0]
 
             print("agent",self.agent_id,"received message:",msg)
 
@@ -61,6 +61,7 @@ class ShopAssist(AgentBrain):
                         agent_id = request[1]
                         if agent_id == self.id:
                             self.task_required.accept(human['nr_moves'])
+                            self.human_todo = "finish"
                             if self.friendly_writing:
                                 send_msg = "Thanks!"
                         else:
@@ -83,6 +84,8 @@ class ShopAssist(AgentBrain):
                         if self.friendly_writing:
                             send_msg = "Great job!"
 
+                        self.human_todo = "choose"
+
                     elif msg.startswith(GIVEUP):
                         success, nr_prod = self.check_success(state)
                         self.update_human_score = human['score'] + self.task_required.give_up_score
@@ -91,6 +94,8 @@ class ShopAssist(AgentBrain):
                         self.task_required = None
                         if self.friendly_writing:
                             send_msg = "No problem!"
+                    
+                        self.human_todo = "choose"
 
             if send_msg != None:
                 self.send_message(Message(send_msg, from_id=self.agent_id))
@@ -162,6 +167,7 @@ class ShopAssist(AgentBrain):
             else:
                 new_task_msg = "New task!"
             self.send_message(Message(new_task_msg, from_id=self.agent_id))
+            #TODO check if we need to put messages together!
             self.new_task = False
 
         action_kwargs["remove_objects"] = remove_objects
@@ -170,6 +176,7 @@ class ShopAssist(AgentBrain):
         action_kwargs["human_id"] = state.get_agents_with_property({'name': 'human'})[0]['obj_id']
         action_kwargs['update_human_score'] = self.update_human_score
         action_kwargs['update_team_score'] = self.update_team_score
+        action_kwargs['todo'] = self.human_todo
 
         return action, action_kwargs
 
@@ -224,6 +231,9 @@ class ReplaceProduct(Action):
             human = grid_world.registered_agents[kwargs['human_id']]
             human.change_property('team_score', kwargs['update_team_score'])
 
+        if kwargs['todo'] != None:
+            human = grid_world.registered_agents[kwargs['human_id']]
+            human.change_property('todo', kwargs['todo'])
 
         for i_rep in range(len(kwargs['replace_objects'])):
 

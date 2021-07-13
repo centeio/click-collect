@@ -190,7 +190,7 @@ def create_tasks(builder, folder_name, prod_locations):
     logger_name = folder_name + "/" + "logger.csv"
     logger = open(logger_name,"w")
 
-    logger.write("current_time,task_id,nr_products,agent,nr_moves_start,nr_moves_end,presented_time,time_start,time_end,completed_prod,status,score,success,success_done_points,unsuccess_done_points,shortest_path,mode,team_score\n")
+    logger.write("current_time,folder,task_id,nr_products,agent,nr_moves_start,nr_moves_end,presented_time,time_start,time_end,completed_prod,status,score,team_score,success,success_done_points,unsuccess_done_points,give_up_points,shortest_path,mode\n")
     logger.close() 
 
     world_products = [x['custom_properties']['img_name'] for x in builder.object_settings if x['callable_class'] == CollectableProduct ]
@@ -213,7 +213,7 @@ def create_tasks(builder, folder_name, prod_locations):
 
     possible_actions = [MoveNorth.__name__, MoveEast.__name__, MoveSouth.__name__, MoveWest.__name__]
 
-    builder.add_agent(loc, TaskMaker(logger_name, prod_locations, action_set = possible_actions, mode=mode), is_traversable=True, team="team_name", name = "taskmaker1", sense_capability=sense_capability, 
+    builder.add_agent(loc, TaskMaker(folder_name, logger_name, prod_locations, action_set = possible_actions, mode=mode), is_traversable=True, team="team_name", name = "taskmaker1", sense_capability=sense_capability, 
                 visualize_opacity=0.0, custom_properties = {"tasks": tasks})
 
 
@@ -306,9 +306,9 @@ def create_builder(folder_name, mode):
 
     human_brain = Human(max_carry_objects=3, grab_range=0)
     builder.add_human_agent([22,15], human_brain, team="Team 1", name="human", 
-                            customizable_properties = ['nr_moves', 'score', 'team_score'],
+                            customizable_properties = ['nr_moves', 'score', 'team_score', 'todo'],
                             key_action_map=key_action_map, sense_capability=sense_capability_h, img_name=human_img, 
-                            nr_moves=0, score=0, team_score=0)
+                            nr_moves=0, score=0, team_score=0, todo="choose")
                             #key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/static/images/transparent.png")
 #            builder.add_agent(loc, brain, team=team_name, name=agent['name'],
 #                sense_capability=sense_capability)

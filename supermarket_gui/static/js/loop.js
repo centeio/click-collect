@@ -46,6 +46,7 @@ var lv_base_url = window.location.hostname,
 
 var lv_current_human_score = 0
 var lv_current_team_score = 0
+var lv_status_todo = null
 
 // check if message offsets are defined and used in gen_grid.js
 if (typeof chat_offsets !== 'undefined') {
@@ -214,6 +215,14 @@ function world_loop() {
     document.getElementById('human_score').innerHTML = "Personal score: " + lv_current_human_score;
     document.getElementById('team_score').innerHTML = "Team score: " + lv_current_team_score;
 
+    // update status todo
+    if (lv_status_todo == "choose") {
+        document.getElementById('todo').innerHTML = "CHOOSE TASK!";
+        document.getElementById('todo').style.color = "red";
+    } else if (lv_status_todo == "finish") {
+        document.getElementById('todo').innerHTML = "Finish task!";
+        document.getElementById('todo').style.color = "white";
+    }  
 
     // if MATRX didn't have a state update yet, wait for the next frame and check again at that time
     if (!lv_to_update_or_not_to_update) {
@@ -322,6 +331,9 @@ function get_MATRX_update() {
             // current score
             lv_current_human_score = lv_state['human']['score']
             lv_current_team_score = lv_state['human']['team_score']
+
+            // current status
+            lv_status_todo = lv_state['human']['todo']
 
             // make sure to synchronize the play/pause button of the frontend with the current MATRX version
             var matrx_paused = data.matrx_paused;

@@ -41,6 +41,14 @@ html {
   color:#f8f9fa
 }
 
+#todo {
+  width: 103px;
+  height: 43px;
+  border-radius: 2px;
+  padding: 2px 5px;
+  color:#f8f9fa
+}
+
 /* Toggle the start button to pause or vice versa if pressed */
 .hidden {
     display: none;
