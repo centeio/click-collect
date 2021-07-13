@@ -72,14 +72,12 @@ class ShopAssist(AgentBrain):
 
                     if msg.startswith(DONE):
                         success, nr_prod = self.check_success(state)
-                        #TODO check scores team vs human
                         if success:
                             self.update_human_score = human['score'] + self.task_required.success_done_score
                             self.update_team_score = human['team_score'] + self.task_required.success_done_score
                         else:
                             self.update_human_score = human['score'] + self.task_required.unsuccess_done_score
                             self.update_team_score = human['team_score'] + self.task_required.unsuccess_done_score
-
                         self.task_required.done(success, nr_prod, human['nr_moves'])
                         self.task_required = None
                         if self.friendly_writing:
@@ -87,6 +85,8 @@ class ShopAssist(AgentBrain):
 
                     elif msg.startswith(GIVEUP):
                         success, nr_prod = self.check_success(state)
+                        self.update_human_score = human['score'] + self.task_required.give_up_score
+                        self.update_team_score = human['team_score'] + self.task_required.give_up_score
                         self.task_required.giveup(success, nr_prod, human['nr_moves'])
                         self.task_required = None
                         if self.friendly_writing:

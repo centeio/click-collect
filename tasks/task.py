@@ -34,8 +34,8 @@ class Task():
         self.success = None
 
         self.success_done_score = points * self.nr_products
-        self.unsuccess_done_score = -5
-        self.give_up_score = 0
+        self.unsuccess_done_score = 0
+        self.give_up_score = -5
 
         self.score = None
         self.team_score = None
@@ -84,6 +84,7 @@ class Task():
         self.time_end = time.time()
         self.nr_moves_ends = nr_moves
         self.score = self.give_up_score
+        self.team_score = self.give_up_score
         self.print_task()
 
     def print_task(self):
