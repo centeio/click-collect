@@ -1,15 +1,4 @@
-matrx          == 2.1.0
-
-Flask>=1.1.2
-numpy>=1.15.4
-requests>=2.21.0
-gevent>=1.4.0
-flask-cors>=3.0.0
-numpydoc==0.9.1
-sphinx==2.2.0
-sphinx_modern_theme
-recommonmark
-sphinx-autoapi
-setuptools
-wheel
-jsonpickle
+matrx==2.1.0
+requests==2.25.1
+numpy==1.20.0
+Flask==1.1.2
