@@ -117,10 +117,8 @@ def add_agents(builder,mode):
     Add bots as specified. All bots have the same sense_capability.
     '''
     sense_capability = SenseCapability({None: 50})
-    # TODO update seed ?
     np.random.shuffle(agent_locations)
 
-    #TODO same color agent and human
     if mode == "benevolence":
         agent_x_img = "/images/smile_glasses_ben.png"
         friendly_writing = True
@@ -301,8 +299,6 @@ if __name__ == "__main__":
         modes = ["ability","benevolence","integrity"]
         mode = np.random.choice(modes)
    
-    #TODO show team score ? 
-
     t = (2021, 7, 8, 8, 0, 0, 0, 0, 0)
 
     local_time = int(time.mktime(t))
