@@ -36,7 +36,7 @@ class Task():
         self.success = None
 
         self.success_done_score = points * self.nr_products
-        self.unsuccess_done_score = 0
+        self.unsuccess_done_score = -3
         self.give_up_score = -5
 
         self.score = None

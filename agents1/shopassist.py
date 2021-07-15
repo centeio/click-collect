@@ -80,7 +80,7 @@ class ShopAssist(AgentBrain):
                             self.update_human_score = human['score'] + self.task_required.success_done_score
                             self.update_team_score = human['team_score'] + self.task_required.success_done_score
                         else:
-                            self.update_human_score = human['score'] + self.task_required.unsuccess_done_score
+                            #self.update_human_score = human['score'] + self.task_required.unsuccess_done_score
                             self.update_team_score = human['team_score'] + self.task_required.unsuccess_done_score
                         self.task_required.update(self.id, human['nr_moves'], success=success, completed_prod=nr_prod, status="DONE")
                         self.task_required = None

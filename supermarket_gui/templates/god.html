@@ -70,6 +70,12 @@
                         <!-- "God" is not an agent, only a view, and as such cannot send messages -->
                         <!-- <input class="form-control" id="message_input" placeholder="Type a message">
                         <button type="button" class="btn btn-primary" onclick="sendMessage()">Send</button> -->
+                        <div id="buttons_chat" ></div>
+                            <button type="button" id="accept_task_x" class="btn btn-primary" onclick="send_message_start_task('accept x')" style="display: none;">Accept X</button>
+                            <button type="button" id="accept_task_z" class="btn btn-primary" onclick="send_message_start_task('accept z')" style="display: none;">Accept Z</button>
+                            <button type="button" id="done" class="btn btn-primary" onclick="send_message_end_task('done')" style="display: none;">Done</button>
+                            <button type="button" id="give_up" class="btn btn-primary" onclick="send_message_end_task('give up')" style="display: none;">Give Up</button>
+                        </div> 
                     </div>
                 </div>
             </div>
