@@ -23,43 +23,31 @@ from supermarket_gui import visualization_server
 script_dir = os.path.dirname(__file__)
 
 room_colors = ['#332288', '#117733', '#44AA99', '#88CCEE', '#DDCC77', '#CC6677', '#AA4499', '#882255', "#44AA99"]
-room_themes = ['bread', 'carbs', 'vegetables', 'fishmeat', 'fruit', 'household', 'icecream', 'sweets', 'drinks']
+room_themes = ['vegetables', 'fishmeat', 'fruit', 'household', 'icecream', 'sweets', 'drinks']
 wall_color = "#CC6677"
 drop_off_color = "#878787"
+aisle_locs_9 = {0: (4,2), 1: (4,6), 2: (4,10), 
+                3: (4,14), 4: (4,18), 5: (4,22),
+                6: (4,26), 7: (1,2), 8:(1,17)}
 
-room_size = (6, 4)  # width, height
-nr_rooms = 9
-rooms_per_row = 3
-average_blocks_per_room = 5
-block_shapes = [0, 1, 2]
-block_colors = ['#332288', '#117733', '#44AA99', '#88CCEE', '#DDCC77', '#CC6677', '#AA4499', '#882255']
-block_size = 0.5
-#nr_drop_zones = 1
-#nr_blocks_needed = 3
-hallway_space = 2 # width, height of corridors
+aisle_locs = {0: (2,2), 1: (2,6), 2: (2,10), 
+                3: (2,14), 4: (2,18), 5: (2,22),
+                6: (2,26)}
+
 drop_zone_size = 5
 
-agent_locations = [(25,9),(25,19)]
-
-agent_sense_range = 2  # the range with which agents detect other agents
-block_sense_range = 2  # the range with which agents detect blocks
-other_sense_range = np.inf  # the range with which agents detect other objects (walls, doors, etc.)
-agent_memory_decay = 5  # we want to memorize states for seconds / tick_duration ticks
-fov_occlusion = True
+agent_locations = [(25,10),(25,18)]
 
 deadline = 2000 # Ticks after which world terminates anyway 
-
 
 
 def add_aisles(builder):
     room_locations = {}
     w=16
     h=4
-    locs = {0: (4,2), 1: (4,6), 2: (4,10), 
-            3: (4,14), 4: (4,18), 5: (4,22),
-            6: (4,26), 7: (1,2), 8:(1,17)}
+
     for room_nr in range(7):
-        room_top_left_x, room_top_left_y = locs[room_nr]
+        room_top_left_x, room_top_left_y = aisle_locs[room_nr]
 
         # We assign a simple random color to each room. Not for any particular reason except to brighting up the place.
         wall_color = room_colors[room_nr]
@@ -79,41 +67,14 @@ def add_aisles(builder):
 
         # Find all inner room locations where we allow objects (making sure that the location behind to door is free)
         room_locations[room_name] = get_room_locations((room_top_left_x, room_top_left_y), w, h)
-
-    w2 = 3
-    h2 = 13
-
-    for room_nr in range(2):
-        room_nr += 7
-        room_top_left_x, room_top_left_y = locs[room_nr]
-        
-
-        # We assign a simple random color to each room. Not for any particular reason except to brighting up the place.
-        wall_color = room_colors[room_nr]
-
-        door_locs = [(room_top_left_x+1, room_top_left_y),(room_top_left_x+1, room_top_left_y+h2-1)]
-
-        for d in range(h2):
-            door_locs += [(room_top_left_x+2, room_top_left_y+d)]
-
-        # Add the room
-        room_name = f"room_{room_nr}"
-        builder.add_room(top_left_location= (room_top_left_x, room_top_left_y), width=w2, height=h2, name=room_name,
-                         door_locations=door_locs, doors_open = True, door_visualization_opacity=0.0,
-                         wall_visualize_colour=wall_color,
-                         with_area_tiles=True,
-                         wall_visualize_opacity=1.0, area_visualize_opacity=0.0)
-
-        # Find all inner room locations where we allow objects (making sure that the location behind to door is free)
-        room_locations[room_name] = get_room_locations((room_top_left_x, room_top_left_y), w2, h2)
     
     return room_locations
 
 
-def add_dropoffs2(builder):
-    builder.add_area(top_left_location=[24,10], width=4, height=1, wall_visualize_colour=wall_color, name="x",
+def add_dropoffs(builder):
+    builder.add_area(top_left_location=[agent_locations[0][0]-1,agent_locations[0][1]+1], width=4, height=1, wall_visualize_colour=wall_color, name="x",
         visualize_colour='#88CCEE', visualize_opacity=1.0, drop_zone_nr=1)
-    builder.add_area(top_left_location=[24, 20], width=4, height=1, wall_visualize_colour=wall_color, name="z", 
+    builder.add_area(top_left_location=[agent_locations[1][0]-1,agent_locations[1][1]+1], width=4, height=1, wall_visualize_colour=wall_color, name="z", 
         visualize_colour='#88CCEE', visualize_opacity=1.0, drop_zone_nr=2)
 
 
@@ -201,7 +162,8 @@ def create_tasks(builder, folder_name, prod_locations):
     tasks = []
 
     for i in range(100):
-        n_items = np.random.choice(list(range(4))) + 1
+        #n_items = np.random.choice(list(range(4))) + 1
+        n_items = 4
         products = np.random.choice(world_products,n_items).tolist()
         tasks += [products]
         msg = str(products) + "\n"
@@ -275,7 +237,7 @@ def create_builder(folder_name, mode):
     #add_dropoffs(builder)
 
     rooms_locations = add_aisles(builder)
-    add_dropoffs2(builder)
+    add_dropoffs(builder)
 
     #time.sleep(3)
     prod_locations = add_products(builder, rooms_locations)
@@ -290,14 +252,20 @@ def create_builder(folder_name, mode):
         'd': MoveEast.__name__,
         's': MoveSouth.__name__,
         'a': MoveWest.__name__,
+        'ArrowUp': MoveNorth.__name__,
+        'ArrowRight': MoveEast.__name__,
+        'ArrowDown': MoveSouth.__name__,
+        'ArrowLeft': MoveWest.__name__,
         'q': GrabObject.__name__,
         'e': DropObject.__name__,
+        'b': GrabObject.__name__,
+        'n': DropObject.__name__
     }
 
     if mode == "ability":
         sense_capability_h = SenseCapability({None:50})
     else:
-        sense_capability_h = SenseCapability({CollectableProduct: 2, GhostProduct:2, None:50})
+        sense_capability_h = SenseCapability({CollectableProduct: 2, GhostProduct:7, None:50})
 
     if mode == "benevolence":
         human_img = "/images/smile_bene.png"
