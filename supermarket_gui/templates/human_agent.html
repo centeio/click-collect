@@ -67,12 +67,37 @@
                         </div>
                         <!--<input class="form-control" id="chat_form_input" placeholder="Open a chatroom first..">
                         <button type="button" id="chat_form_submit" class="btn btn-primary" onclick="send_message(event)" disabled>Send</button> -->
-                        <div id="buttons_chat"></div>
+                        <div id="buttons_chat">
                             <button type="button" id="accept_task_x" class="btn btn-primary" onclick="send_message_start_task('accept x')">Accept X</button>
                             <button type="button" id="accept_task_z" class="btn btn-primary" onclick="send_message_start_task('accept z')">Accept Z</button>
                             <button type="button" id="done" class="btn btn-primary" onclick="send_message_end_task('done')" disabled>Done</button>
                             <button type="button" id="give_up" class="btn btn-primary" onclick="send_message_end_task('give up')" disabled>Give Up</button>
                         </div> 
+                        <div id="instructions">
+                            <table class="table table-striped table-bordered">
+                                <tr>
+                                    <th scope="col">Action</th>
+                                    <th scope="col">Personal reward</th>
+                                    <th scope="col">Team reward</th>
+                                </tr>
+                                <tr>
+                                    <td>Done (successfully):</td>
+                                    <td>+8</td>
+                                    <td>+8</td>
+                                </tr>
+                                <tr>
+                                    <td>Done (unsuccessfully):</td>
+                                    <td> 0</td>
+                                    <td>-3</td>
+                                </tr>
+                                <tr>
+                                    <td>Give up:</td>
+                                    <td>-5</td>
+                                    <td>-5</td>
+                                </tr>
+                            </table>
+                            <p><b>Keys:</b> To move, use the arrows on the keyboard. To grab, press "b" on top of the object. To drop, press "n" on the position intended.</p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,3 +1,0 @@
-current_time,folder_name,task_id,agent,nr_moves,nr_products,difficulty_heuristic,nr_completed_prod,status,is_success,mode
-1626384726.9063854,logger/657109,0,x,0,4,67,0,PRESENTED,False,normal
-1626384726.9432595,logger/657109,1,z,0,4,75,0,PRESENTED,False,normal

@@ -298,6 +298,11 @@ h5 {
     transition: background-color 100ms linear;
 }
 
+#buttons_chat {
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
 /* subtile + context menu bug fix. Subtile objects only block when exactly on top of eachother. */
 .object {
     pointer-events: none;
