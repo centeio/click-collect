@@ -292,7 +292,7 @@ if __name__ == "__main__":
 
     local_time = int(time.mktime(t))
 
-    folder_name = logger_folder + "/" + str(int(time.time()) - local_time)
+    folder_name = "logger" + "/" + logger_folder + "/" + str(int(time.time()) - local_time)
     os.makedirs(os.path.abspath(os.path.join(script_dir, folder_name)))
     print(int(datetime.now().timestamp()), "FOLDER NAME", folder_name)
 
