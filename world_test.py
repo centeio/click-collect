@@ -272,14 +272,17 @@ def create_builder(folder_name, mode):
 
  
 if __name__ == "__main__":
-    modes = ["ability","benevolence","integrity","normal","trial"]
+    modes = ["ability","benevolence","integrity","normal"]
     print("arg:", len(sys.argv), str(sys.argv))
 
 
-    if len(sys.argv) != 2 or sys.argv[1] not in modes:
-        raise Exception("Please specify one argument: 'random', 'benevolence', 'integrity', 'normal' or 'trial'.")
+    if len(sys.argv) != 3 or sys.argv[1] not in modes:
+        raise Exception("Please specify two arguments\n mode:'random', 'benevolence', 'integrity', 'normal'\n directory name for logging")
+
+    
 
     mode = sys.argv[1]
+    logger_folder = sys.argv[2]
 
     if mode == "random":
         modes = ["ability","benevolence","integrity"]
@@ -289,7 +292,7 @@ if __name__ == "__main__":
 
     local_time = int(time.mktime(t))
 
-    folder_name = "logger" + "/" + str(int(time.time()) - local_time)
+    folder_name = logger_folder + "/" + str(int(time.time()) - local_time)
     os.makedirs(os.path.abspath(os.path.join(script_dir, folder_name)))
     print(int(datetime.now().timestamp()), "FOLDER NAME", folder_name)
 
