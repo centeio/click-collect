@@ -80,7 +80,7 @@ class ShopAssist(AgentBrain):
                             self.update_human_score = human['score'] + self.task_required.success_done_score
                             self.update_team_score = human['team_score'] + self.task_required.success_done_score
                         else:
-                            #self.update_human_score = human['score'] + self.task_required.unsuccess_done_score
+                            self.update_human_score = human['score'] + self.task_required.success_done_score
                             self.update_team_score = human['team_score'] + self.task_required.unsuccess_done_score
                         self.task_required.update(self.id, human['nr_moves'], success=success, completed_prod=nr_prod, status="DONE")
                         self.task_required = None
@@ -165,9 +165,9 @@ class ShopAssist(AgentBrain):
                 add_objects += [obj_kwargs]
 
             if self.friendly_writing == True:
-                new_task_msg = "I have a new task. Can you help please?"
+                new_task_msg = "I have a new product to be collected. Can you help please?"
             else:
-                new_task_msg = "New task!"
+                new_task_msg = "New product to be collected!"
             self.send_message(Message(new_task_msg, from_id=self.agent_id))
             #TODO check if we need to put messages together!
             self.new_task = False

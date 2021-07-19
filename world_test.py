@@ -161,7 +161,7 @@ def create_tasks(builder, folder_name, prod_locations):
 
     for i in range(100):
         #n_items = np.random.choice(list(range(4))) + 1
-        n_items = 4
+        n_items = 1
         products = np.random.choice(world_products,n_items).tolist()
         tasks += [products]
         msg = str(products) + "\n"
@@ -177,31 +177,19 @@ def create_tasks(builder, folder_name, prod_locations):
                 visualize_opacity=0.0, custom_properties = {"tasks": tasks})
 
 
-    print("FINISHED CREATING TASK MAKER")
-
-
 class CollectionGoal(WorldGoal):
 
-    def __init__(self, max_nr_ticks:int):
+    def __init__(self, max_time):
         '''
         @param max_nr_ticks the max number of ticks to be used for this task
         '''
         super().__init__()
-        self.max_nr_ticks = max_nr_ticks
-
-        # A dictionary of all drop locations. The keys is the drop zone number, the value another dict.
-        # This dictionary contains as key the rank of the to be collected object and as value the location
-        # of where it should be dropped, the shape and colour of the block, and the tick number the correct
-        # block was delivered. The rank and tick number is there so we can check if objects are dropped in
-        # the right order.
-        self.__drop_off:dict = None
-
-        # We also track the progress
-        self.__progress = 0
+        self.max_time = max_time
 
     #override
     def goal_reached(self, grid_world: GridWorld):
-        if grid_world.current_nr_ticks >= self.max_nr_ticks:
+        #print("time", int(datetime.now().timestamp()))
+        if int(datetime.now().timestamp()) >= self.max_time:
             return True
         return False
 
@@ -213,8 +201,9 @@ def create_builder(folder_name, mode):
     print("MODE", mode)
     tick_dur = 0.0
 
-    # TODO change goal to 10min
-    goal = CollectionGoal(10000)
+    # goal 10min
+    max_time = int(datetime.now().timestamp()) + 60*10 + 10
+    goal = CollectionGoal(max_time)
 
     builder = WorldBuilder(random_seed=1, shape=[32, 32], tick_duration=tick_dur, verbose=False, run_matrx_api=True,
                            run_matrx_visualizer=False, simulation_goal=goal,
@@ -223,7 +212,6 @@ def create_builder(folder_name, mode):
     builder.add_room(top_left_location=[0, 0], width=32, height=32, wall_visualize_colour=wall_color,
                     wall_visualize_opacity=1.0, area_visualize_opacity=0.0, name="world_bounds")
 
-    #TODO change locations to global values
     builder.add_object([agent_locations[0][0]+1,agent_locations[0][1]],'basket',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/basket.png")
     builder.add_object([agent_locations[1][0]+1,agent_locations[1][1]],'basket',EnvObject,is_traversable=False,is_movable=False,visualize_shape='img',img_name="/images/basket.png")
 
@@ -270,7 +258,7 @@ def create_builder(folder_name, mode):
     else:
         human_img = "/images/smile.png"
 
-    human_brain = Human(max_carry_objects=3, grab_range=0)
+    human_brain = Human(max_carry_objects=1, grab_range=0)
     builder.add_human_agent([22,15], human_brain, team="Team 1", name="human", 
                             customizable_properties = ['nr_moves', 'score', 'team_score', 'todo'],
                             key_action_map=key_action_map, sense_capability=sense_capability_h, img_name=human_img, 
@@ -293,8 +281,6 @@ if __name__ == "__main__":
 
     mode = sys.argv[1]
 
-    print(int(datetime.now().timestamp()))
-
     if mode == "random":
         modes = ["ability","benevolence","integrity"]
         mode = np.random.choice(modes)
@@ -305,6 +291,8 @@ if __name__ == "__main__":
 
     folder_name = "logger" + "/" + str(int(time.time()) - local_time)
     os.makedirs(os.path.abspath(os.path.join(script_dir, folder_name)))
+    print(int(datetime.now().timestamp()), "FOLDER NAME", folder_name)
+
 
     builder = create_builder(folder_name, mode)
 

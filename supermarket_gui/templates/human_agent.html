@@ -68,9 +68,9 @@
                         <!--<input class="form-control" id="chat_form_input" placeholder="Open a chatroom first..">
                         <button type="button" id="chat_form_submit" class="btn btn-primary" onclick="send_message(event)" disabled>Send</button> -->
                         <div id="buttons_chat">
-                            <button type="button" id="accept_task_x" class="btn btn-primary" onclick="send_message_start_task('accept x')">Accept X</button>
-                            <button type="button" id="accept_task_z" class="btn btn-primary" onclick="send_message_start_task('accept z')">Accept Z</button>
-                            <button type="button" id="done" class="btn btn-primary" onclick="send_message_end_task('done')" disabled>Done</button>
+                            <button type="button" id="accept_task_x" class="btn btn-primary" onclick="send_message_start_task('accept x')">Help X</button>
+                            <button type="button" id="accept_task_z" class="btn btn-primary" onclick="send_message_start_task('accept z')">Help Z</button>
+                            <button type="button" id="done" class="btn btn-primary" onclick="send_message_end_task('done')" disabled>Collected</button>
                             <button type="button" id="give_up" class="btn btn-primary" onclick="send_message_end_task('give up')" disabled>Give Up</button>
                         </div> 
                         <div id="instructions">
@@ -81,14 +81,14 @@
                                     <th scope="col">Team reward</th>
                                 </tr>
                                 <tr>
-                                    <td>Done (successfully):</td>
-                                    <td>+8</td>
-                                    <td>+8</td>
+                                    <td>Collected (truth):</td>
+                                    <td>+10</td>
+                                    <td>+10</td>
                                 </tr>
                                 <tr>
-                                    <td>Done (unsuccessfully):</td>
-                                    <td> 0</td>
-                                    <td>-3</td>
+                                    <td>Collected (lie):</td>
+                                    <td>+10</td>
+                                    <td>-10</td>
                                 </tr>
                                 <tr>
                                     <td>Give up:</td>
@@ -96,7 +96,7 @@
                                     <td>-5</td>
                                 </tr>
                             </table>
-                            <p><b>Keys:</b> To move, use the arrows on the keyboard. To grab, press "b" on top of the object. To drop, press "n" on the position intended.</p>
+                            <p><b>Keys:</b> To move, use the arrows on the keyboard (or "wasd"). To grab a product, press "b" (or "q") on top of it. To drop a product, press "n" (or "e") on the position intended.</p>
                         </div>
                     </div>
                 </div>
