@@ -50,7 +50,7 @@ class ShopAssist(AgentBrain):
 
         for msg in self.received_messages:
 
-            print("agent",self.agent_id,"received message:",msg)
+            #print("agent",self.agent_id,"received message:",msg)
 
             if self.task_required != None:
 
@@ -246,7 +246,7 @@ class ReplaceProduct(Action):
                 obj2 =  grid_world.environment_objects[obj['obj_id']]
                 grid_world.remove_from_grid(object_id=obj['obj_id'])
                 props = obj2.change_property('location',obj['init_loc'])
-                print(props)
+                #print(props)
                 grid_world._register_env_object(obj2)
 
         for i_rem in range(len(kwargs['remove_objects'])):
