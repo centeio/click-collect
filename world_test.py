@@ -179,16 +179,18 @@ def create_tasks(builder, folder_name, prod_locations):
 
 class CollectionGoal(WorldGoal):
 
-    def __init__(self, max_time):
+    def __init__(self, duration):
         '''
         @param max_nr_ticks the max number of ticks to be used for this task
         '''
         super().__init__()
-        self.max_time = max_time
+        self.max_time = None
 
     #override
     def goal_reached(self, grid_world: GridWorld):
         #print("time", int(datetime.now().timestamp()))
+        if self.max_time == None:
+            self.max_time = int(datetime.now().timestamp()) + duration
         if int(datetime.now().timestamp()) >= self.max_time:
             return True
         return False
@@ -196,12 +198,11 @@ class CollectionGoal(WorldGoal):
     # def __check_completion(self, grid_world):
 
 
-def create_builder(folder_name, mode):
+def create_builder(folder_name, mode, duration):
     tick_dur = 0.0
 
     # goal 10min
-    max_time = int(datetime.now().timestamp()) + 60*10 + 10
-    goal = CollectionGoal(max_time)
+    goal = CollectionGoal(duration)
 
     builder = WorldBuilder(random_seed=1, shape=[32, 32], tick_duration=tick_dur, verbose=False, run_matrx_api=True,
                            run_matrx_visualizer=False, simulation_goal=goal,
@@ -272,13 +273,14 @@ def create_builder(folder_name, mode):
 if __name__ == "__main__":
     modes = ["ability","benevolence","integrity","normal"]
 
-    if len(sys.argv) != 3 or sys.argv[1] not in modes:
-        raise Exception("Please specify two arguments\n mode:'random', 'benevolence', 'integrity', 'normal'\n directory name for logging")
+    if len(sys.argv) != 4 or sys.argv[1] not in modes:
+        raise Exception("Please specify three arguments 1) mode:'random', 'benevolence', 'integrity', 'normal' 2) directory name for logging 3) duration, in seconds")
 
     
 
     mode = sys.argv[1]
     logger_folder = sys.argv[2]
+    duration = int(sys.argv[3])
 
     if mode == "random":
         modes = ["ability","benevolence","integrity"]
@@ -293,7 +295,7 @@ if __name__ == "__main__":
     print(int(datetime.now().timestamp()), "FOLDER NAME", folder_name)
 
 
-    builder = create_builder(folder_name, mode)
+    builder = create_builder(folder_name, mode, duration)
 
     #media_folder = os.path.dirname(os.path.join(script_dir, "images"))
     media_folder = os.path.abspath(os.path.join(script_dir, "media"))

@@ -111,14 +111,15 @@ class TaskMaker(AgentBrain):
     #override
     def filter_observations(self, state):
         global pool
+        if self.send_msg != None:
+            self.send_message(Message(self.send_msg, from_id=self.agent_id))
+            self.send_msg = None
+
         if pool.qsize() < min_pool_size:
             n_new_tasks = min_pool_size - pool.qsize()
             for i in range(n_new_tasks):
                 self.create_task(state)
 
-        if self.send_msg != None:
-            self.send_message(Message(self.send_msg, from_id=self.agent_id))
-            self.send_msg = None
         return state
 
     def decide_on_action(self, state:State):
