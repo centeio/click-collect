@@ -1,0 +1,8 @@
+current_time,folder_name,task_id,agent,nr_moves,nr_products,difficulty_heuristic,nr_completed_prod,status,is_success,mode
+1626766157.8341525,logger/pilot/1038551,0,x,0,1,15,0,PRESENTED,False,benevolence
+1626766157.8605123,logger/pilot/1038551,1,z,0,1,21,0,PRESENTED,False,benevolence
+1626766175.3723495,logger/pilot/1038551,0,x,0,1,15,0,ACCEPTED,False,benevolence
+1626766175.3925536,logger/pilot/1038551,1,z,0,1,21,0,DISCARDED,False,benevolence
+1626766175.3926144,logger/pilot/1038551,2,z,0,1,22,0,PRESENTED,False,benevolence
+1626766227.711987,logger/pilot/1038551,0,x,89,1,15,1,DONE,True,benevolence
+1626766227.712115,logger/pilot/1038551,3,x,89,1,27,0,PRESENTED,False,benevolence

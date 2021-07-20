@@ -1,0 +1,11 @@
+current_time,folder_name,task_id,agent,nr_moves,nr_products,difficulty_heuristic,nr_completed_prod,status,is_success,mode
+1626448552.9353604,logger/720944,0,x,0,4,118,0,PRESENTED,False,normal
+1626448552.9608626,logger/720944,1,z,0,4,82,0,PRESENTED,False,normal
+1626448569.128508,logger/720944,0,x,1,4,118,0,DISCARDED,False,normal
+1626448569.1285985,logger/720944,2,x,1,4,62,0,PRESENTED,False,normal
+1626448569.185265,logger/720944,1,z,1,4,82,0,ACCEPTED,False,normal
+1626448932.29122,logger/720944,1,z,709,4,82,4,DONE,True,normal
+1626448932.291339,logger/720944,3,z,709,4,104,0,PRESENTED,False,normal
+1626448937.11308,logger/720944,2,x,709,4,62,0,DISCARDED,False,normal
+1626448937.1131673,logger/720944,4,x,709,4,61,0,PRESENTED,False,normal
+1626448937.1557105,logger/720944,3,z,709,4,104,0,ACCEPTED,False,normal
