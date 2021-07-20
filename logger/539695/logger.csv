@@ -1,8 +1,0 @@
-current_time,folder_name,task_id,agent,nr_moves,nr_products,difficulty_heuristic,nr_completed_prod,status,is_success,mode
-1626267313.155833,logger/539695,0,x,0,1,28,0,PRESENTED,False,normal
-1626267313.1824882,logger/539695,1,z,0,3,57,0,PRESENTED,False,normal
-1626267338.4954758,logger/539695,0,x,0,1,28,0,ACCEPTED,False,normal
-1626267338.52552,logger/539695,1,z,0,3,57,0,DISCARDED,False,normal
-1626267338.525592,logger/539695,2,z,0,4,100,0,PRESENTED,False,normal
-1626267379.0222056,logger/539695,0,x,78,1,28,0,GIVEUP,False,normal
-1626267379.0223505,logger/539695,3,x,78,3,74,0,PRESENTED,False,normal
