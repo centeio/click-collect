@@ -47,6 +47,7 @@ var lv_base_url = window.location.hostname,
 var lv_current_human_score = 0
 var lv_current_team_score = 0
 var lv_status_todo = null
+//var lv_time_left = 0
 
 // check if message offsets are defined and used in gen_grid.js
 if (typeof chat_offsets !== 'undefined') {
@@ -232,6 +233,14 @@ function world_loop() {
         document.getElementById("accept_task_z").disabled = true;
     }  
 
+    //update timer
+    //var minutes = Math.floor(lv_time_left / 60)  
+    //var seconds = Math.floor(lv_time_left % 60)
+
+    //document.getElementById('timer').innerHTML = lv_time_left
+    //document.getElementById('timer_min').innerHTML = minutes + "m";
+    //document.getElementById('timer_sec').innerHTML = seconds + "s";
+
     // if MATRX didn't have a state update yet, wait for the next frame and check again at that time
     if (!lv_to_update_or_not_to_update) {
         request_new_frame();
@@ -342,6 +351,9 @@ function get_MATRX_update() {
 
             // current status
             lv_status_todo = lv_state['human']['todo']
+
+            //time_left
+            //lv_time_left = lv_state['human']['time_left']
 
             // make sure to synchronize the play/pause button of the frontend with the current MATRX version
             var matrx_paused = data.matrx_paused;

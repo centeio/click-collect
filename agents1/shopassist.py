@@ -1,5 +1,7 @@
 import numpy as np # type: ignore
 import random
+from datetime import datetime
+
 
 from matrx.actions import Action, ActionResult, MoveNorth, OpenDoorAction, CloseDoorAction # type: ignore
 from matrx.actions.move_actions import MoveEast, MoveSouth, MoveWest # type: ignore
@@ -28,7 +30,7 @@ class ShopAssist(AgentBrain):
     and replies 'welcome '+ID to all received messages.
     It checks that received welcomes are indeed using my own ID
     """
-    def __init__(self,name,drop_zone_nr,drop_zone_size,friendly_writing):
+    def __init__(self,name,drop_zone_nr,drop_zone_size,friendly_writing,duration):
         super().__init__(memorize_for_ticks=None)
         self.id = name
         self.drop_zone_nr = drop_zone_nr
@@ -40,6 +42,8 @@ class ShopAssist(AgentBrain):
         self.friendly_writing = friendly_writing
         self.welcome = False
         self.human_todo = "choose"
+        self.duration = duration
+        self.max_time = None
     
     #override
     def filter_observations(self, state):
@@ -47,6 +51,8 @@ class ShopAssist(AgentBrain):
         self.update_human_score = None
         send_msg = None
         human = state.get_agents_with_property({'name': 'human'})[0]
+        if self.max_time == None:
+            self.max_time = int(datetime.now().timestamp()) + self.duration
 
         for msg in self.received_messages:
 
@@ -179,6 +185,7 @@ class ShopAssist(AgentBrain):
         action_kwargs['update_human_score'] = self.update_human_score
         action_kwargs['update_team_score'] = self.update_team_score
         action_kwargs['todo'] = self.human_todo
+        action_kwargs['time_left'] = self.max_time - int(datetime.now().timestamp())
 
         self.human_todo = None
 
@@ -238,6 +245,9 @@ class ReplaceProduct(Action):
         if kwargs['todo'] != None:
             human = grid_world.registered_agents[kwargs['human_id']]
             human.change_property('todo', kwargs['todo'])
+
+        human = grid_world.registered_agents[kwargs['human_id']]
+        human.change_property('time_left', kwargs['time_left'])
 
         for i_rep in range(len(kwargs['replace_objects'])):
 

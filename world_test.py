@@ -12,6 +12,7 @@ from matrx.objects import EnvObject # type: ignore
 from matrx.world_builder import RandomProperty # type: ignore
 from matrx.goals import WorldGoal # type: ignore
 from matrx.utils import get_room_locations
+from matrx.agents.agent_utils.state import State
 
 from agents1.shopassist import ShopAssist
 from agents1.task_maker import TaskMaker
@@ -112,7 +113,7 @@ def add_products(builder, room_locations):
     return prod_locations
 
 
-def add_agents(builder,mode):
+def add_agents(builder,mode,duration):
     '''
     Add bots as specified. All bots have the same sense_capability.
     '''
@@ -128,12 +129,12 @@ def add_agents(builder,mode):
 
 
 
-    builder.add_agent(agent_locations[0], ShopAssist(name="x",drop_zone_nr=1, drop_zone_size = drop_zone_size, friendly_writing = friendly_writing), name="Agent X",
+    builder.add_agent(agent_locations[0], ShopAssist(name="x",drop_zone_nr=1, drop_zone_size = drop_zone_size, friendly_writing = friendly_writing, duration=duration), name="Agent X",
 #                sense_capability=sense_capability)
             sense_capability=sense_capability, img_name=agent_x_img)
     builder.add_object([agent_locations[0][0]+2,agent_locations[0][1]],'agent_id_x',EnvObject,is_traversable=True,is_movable=False,visualize_shape='img',img_name="/images/x.png")
 
-    builder.add_agent(agent_locations[1], ShopAssist(name="z",drop_zone_nr=2, drop_zone_size = drop_zone_size, friendly_writing = False), name="Agent Z", 
+    builder.add_agent(agent_locations[1], ShopAssist(name="z",drop_zone_nr=2, drop_zone_size = drop_zone_size, friendly_writing = False, duration = duration), name="Agent Z", 
 #                sense_capability=sense_capability)
             sense_capability=sense_capability, img_name="/images/smile_glasses.png")
     builder.add_object([agent_locations[1][0]+2,agent_locations[1][1]],'agent_id_z',EnvObject,is_traversable=True,is_movable=False,visualize_shape='img',img_name="/images/z.png")
@@ -177,7 +178,7 @@ def create_tasks(builder, folder_name, prod_locations):
                 visualize_opacity=0.0, custom_properties = {"tasks": tasks})
 
 
-class CollectionGoal(WorldGoal):
+class OurGoal(WorldGoal):
 
     def __init__(self, duration):
         '''
@@ -185,12 +186,15 @@ class CollectionGoal(WorldGoal):
         '''
         super().__init__()
         self.max_time = None
+        self.duration = duration
 
     #override
-    def goal_reached(self, grid_world: GridWorld):
+    def goal_reached(self, grid_world):
         #print("time", int(datetime.now().timestamp()))
+
         if self.max_time == None:
-            self.max_time = int(datetime.now().timestamp()) + duration
+            self.max_time = int(datetime.now().timestamp()) + self.duration
+
         if int(datetime.now().timestamp()) >= self.max_time:
             return True
         return False
@@ -202,7 +206,7 @@ def create_builder(folder_name, mode, duration):
     tick_dur = 0.0
 
     # goal 10min
-    goal = CollectionGoal(duration)
+    goal = OurGoal(duration)
 
     builder = WorldBuilder(random_seed=1, shape=[32, 32], tick_duration=tick_dur, verbose=False, run_matrx_api=True,
                            run_matrx_visualizer=False, simulation_goal=goal,
@@ -227,7 +231,7 @@ def create_builder(folder_name, mode, duration):
     #time.sleep(3)
     prod_locations = add_products(builder, rooms_locations)
 
-    add_agents(builder, mode)
+    add_agents(builder, mode, duration)
 
     create_tasks(builder, folder_name, prod_locations)
 
@@ -259,9 +263,9 @@ def create_builder(folder_name, mode, duration):
 
     human_brain = Human(max_carry_objects=1, grab_range=0)
     builder.add_human_agent([22,15], human_brain, team="Team 1", name="human", 
-                            customizable_properties = ['nr_moves', 'score', 'team_score', 'todo'],
+                            customizable_properties = ['nr_moves', 'score', 'team_score', 'todo', 'time_left'],
                             key_action_map=key_action_map, sense_capability=sense_capability_h, img_name=human_img, 
-                            nr_moves=0, score=0, team_score=0, todo="choose")
+                            nr_moves=0, score=0, team_score=0, time_left=duration, todo="choose")
                             #key_action_map=key_action_map, sense_capability=sense_capability_h, img_name="/static/images/transparent.png")
 #            builder.add_agent(loc, brain, team=team_name, name=agent['name'],
 #                sense_capability=sense_capability)
