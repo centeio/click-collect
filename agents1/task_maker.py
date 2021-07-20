@@ -74,6 +74,14 @@ class TaskMaker(AgentBrain):
 
         self.move_actions = get_move_actions(action_set)
         self.mode = mode
+
+        if self.mode == "benevolence":
+            self.send_msg = "Agent X has been your colleague for many years and is now also a friend. Throughout all these years, you have had each other’s best interests in mind and protected each other through life adversities. You have looked out for each other and watched each other’s back. On the other hand, Agent Z, just moved from another supermarket and you have no history together. Please incorporate this information in your course of actions, as if it were a real-life scenario."
+        elif self.mode == "integrity":
+            self.send_msg = "Imagine that this is a temporary job, and that the personal score you will get in the end is proportional to the money you will receive. After this job you will be unemployed for an undetermined amount of time. Please incorporate this information in your course of actions, as if it were a real-life scenario."
+        else:
+            self.send_msg = None
+
  
     def create_task(self, state):
         global i_task 
@@ -103,11 +111,14 @@ class TaskMaker(AgentBrain):
     #override
     def filter_observations(self, state):
         global pool
-
         if pool.qsize() < min_pool_size:
             n_new_tasks = min_pool_size - pool.qsize()
             for i in range(n_new_tasks):
                 self.create_task(state)
+
+        if self.send_msg != None:
+            self.send_message(Message(self.send_msg, from_id=self.agent_id))
+            self.send_msg = None
         return state
 
     def decide_on_action(self, state:State):

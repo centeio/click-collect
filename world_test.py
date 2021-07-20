@@ -197,8 +197,6 @@ class CollectionGoal(WorldGoal):
 
 
 def create_builder(folder_name, mode):
-
-    print("MODE", mode)
     tick_dur = 0.0
 
     # goal 10min
@@ -273,8 +271,6 @@ def create_builder(folder_name, mode):
  
 if __name__ == "__main__":
     modes = ["ability","benevolence","integrity","normal"]
-    print("arg:", len(sys.argv), str(sys.argv))
-
 
     if len(sys.argv) != 3 or sys.argv[1] not in modes:
         raise Exception("Please specify two arguments\n mode:'random', 'benevolence', 'integrity', 'normal'\n directory name for logging")

@@ -365,7 +365,7 @@ class Human(HumanAgentBrain):
 
         # read messages and remove them
         for message in list(self.received_messages):
-            print("Received message:", message)
+            #print("Received message:", message)
             self.received_messages.remove(message)
 
         if user_input is None:
