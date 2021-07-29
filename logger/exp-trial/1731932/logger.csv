@@ -1,0 +1,8 @@
+current_time,folder_name,task_id,agent,nr_moves,nr_products,difficulty_heuristic,nr_completed_prod,status,is_success,mode
+1627459655.7618446,logger/exp-trial/1731932,0,x,0,1,30,0,PRESENTED,False,ability
+1627459655.7877102,logger/exp-trial/1731932,1,z,0,1,14,0,PRESENTED,False,ability
+1627459862.4989114,logger/exp-trial/1731932,0,x,10,1,30,0,ACCEPTED,False,ability
+1627459862.520617,logger/exp-trial/1731932,1,z,10,1,14,0,DISCARDED,False,ability
+1627459862.520691,logger/exp-trial/1731932,2,z,10,1,29,0,PRESENTED,False,ability
+1627459952.1925611,logger/exp-trial/1731932,0,x,64,1,30,1,DONE,True,ability
+1627459952.207448,logger/exp-trial/1731932,3,x,64,1,26,0,PRESENTED,False,ability
