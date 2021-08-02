@@ -1,0 +1,3 @@
+current_time,folder_name,task_id,agent,nr_moves,nr_products,difficulty_heuristic,nr_completed_prod,status,is_success,mode
+1627717346.7012136,logger/exp-exp/1989737,0,x,0,1,25,0,PRESENTED,False,integrity
+1627717346.7203996,logger/exp-exp/1989737,1,z,0,1,15,0,PRESENTED,False,integrity
